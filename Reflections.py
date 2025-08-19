@@ -10,13 +10,13 @@ st.title("Simplex Diagram with Reflections")
 # --------------------
 dimvecs_str = st.text_area(
     "Enter dimension vectors (space-separated)",
-    "4 8 15"
+    "0 1 0\n0 2 1\n1 2 1\n1 2 0"
 )
 DimVecs = [[int(x) for x in line.split()] for line in dimvecs_str.strip().splitlines()]
 
 Given = [tuple(pt) for pt in DimVecs]
 
-sequence = st.text_input("Enter sequence of reflections", "1213131323")
+sequence = st.text_input("Enter sequence of reflections", "121323")
 
 n = st.number_input("Number of iterations of the sequence", min_value=0, value=1, step=1)
 n = int(n)+1
