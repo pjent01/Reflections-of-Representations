@@ -17,7 +17,7 @@ DimVecs_base = [[int(x) for x in line.split()] for line in dimvecs_str.strip().s
 Given_base = [tuple(pt) for pt in DimVecs_base]
 
 # mehrere Sequenzen möglich
-sequences_str = st.text_area("Enter sequences of reflections", "121323\n123\n321", height=145)
+sequences_str = st.text_area("Enter sequences of reflections", "121323\n123123\n321321", height=145)
 sequences = [seq.strip() for seq in sequences_str.split() if seq.strip()]
 
 n = st.number_input("Number of iterations of the sequences", min_value=0, value=3, step=1)
