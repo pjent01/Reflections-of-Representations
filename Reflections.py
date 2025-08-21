@@ -66,13 +66,24 @@ def arrow_symbol(mode="updown"):
 # --------------------
 
 col1,col2,col3 = st.columns([1,1,1])
+with col1:
+    col1_1,col1_2,col1_3 = st.columns([1,1,2])
+    with col1_1:
+        use_color = st.checkbox("Color", value=True, key="color_toggle")
+    with col1_2:
+        if use_color:
+            st.write("\n")
+            st.write("<b><span style='color:rgb(180, 0, 0)'>Wrong Quiver</span></b>", unsafe_allow_html=True)
+    with col1_3:
+        if use_color:
+            st.write("\n")
+            st.write("<b><span style='color:#228b22'>Correct Quiver</span></b>", unsafe_allow_html=True)
+
 with col2:
-    checkbox1_col, checkbox2_col, checkbox3_col = st.columns([1,1,1])
+    checkbox1_col, checkbox2_col = st.columns([1,1])
     with checkbox1_col:
-        use_color = st.checkbox("Color", value=False, key="color_toggle")
-    with checkbox2_col:
         use_arrows = st.checkbox("Quivers", value=True, key="arrows_toggle")
-    with checkbox3_col:
+    with checkbox2_col:
         show_polygons = st.checkbox("Polygons", value=True, key="polygons_toggle")
 
 # --------------------
@@ -168,23 +179,30 @@ for col, sequence in zip(cols, sequences):
                 # Quiver Output (unverändert)
                 if q == [1,1]:
                     arrow = arrow_symbol("down") if use_arrows else ""
-                    line_color = "black"
+                    line_color = "green" if use_color else "black"
                 elif q == [0,1]:
                     arrow = arrow_symbol("updown") if use_arrows else ""
-                    line_color = "red" if use_color else "black"
+                    line_color = "rgb(180, 0, 0)" if use_color else "black"
                 elif q == [1,0]:
                     arrow = arrow_symbol("downup") if use_arrows else ""
-                    line_color = "red" if use_color else "black"
+                    line_color = "rgb(180, 0, 0)" if use_color else "black"
                 elif q == [0,0]:
                     arrow = arrow_symbol("up") if use_arrows else ""
-                    line_color = "black"
+                    line_color = "green" if use_color else "black"
 
-                output.append(f"<span style='color:{line_color}'>{arrow}  Reflection: {' '.join([f'{d}' for d in digits])}</span>")
+                text1 = f"{arrow}  Reflection: {' '.join([f'{d}' for d in digits])}"
+                if line_color == "green":
+                    text1 = f"<b>{text1}</b>"
+                output.append(f"<span style='color:{line_color}'>{text1}</span>")
 
+        
                 for idx, (A,B,C) in enumerate(DimVecs, 1):
                     cart = bary_to_cart((A,B,C))
                     all_nodes.append((cart, (A,B,C)))
-                    output.append(f"<span style='color:{line_color}'>&nbsp;&nbsp;&nbsp;&nbsp;P{idx}: ({A}, {B}, {C})</span>")
+                    text2 = f"&nbsp;&nbsp;&nbsp;&nbsp;P{idx}: ({A}, {B}, {C})"
+                    if line_color == "green":
+                        text2 = f"<b>{text2}</b>"
+                    output.append(f"<span style='color:{line_color}'>{text2}</span>")
 
         # --------------------
         # Zusätzliche Geometrie: Dreieck und Ellipse (wie ursprünglich)
@@ -222,19 +240,19 @@ for col, sequence in zip(cols, sequences):
 
         # Fundamental Domain
         fig.add_trace(go.Scatter(x=[p[0] for p in extra_triangle_cart], y=[p[1] for p in extra_triangle_cart],
-                                mode="lines", line=dict(color="green", width=2), name="Triangle", showlegend=False, hoverinfo="skip"))
+                                mode="lines", line=dict(color="black", width=2), name="Triangle", showlegend=False, hoverinfo="skip"))
 
         # Ellipse
         fig.add_trace(go.Scatter(x=ellipse_cart[:, 0], y=ellipse_cart[:, 1],
-                                mode="lines", line=dict(color="blue", width=2), name="Ellipse", showlegend=False, hoverinfo="skip"))
+                                mode="lines", line=dict(color="black", width=2), name="Ellipse", showlegend=False, hoverinfo="skip"))
 
-        if use_arrows:
+        if use_color:
             # Red nodes: wrong1 + wrong2
             wrong_nodes = wrong1 + wrong2
             fig.add_trace(go.Scatter(x=[bary_to_cart(renormalize(pt))[0] for node in wrong_nodes for pt in node],
                                 y=[bary_to_cart(renormalize(pt))[1] for node in wrong_nodes for pt in node],
                                 mode="markers", 
-                                marker=dict(color="red", size=6), name="Wrong Quiver", legendgroup="wrong", showlegend=True, 
+                                marker=dict(color="rgb(180, 0, 0)", size=6), name="Wrong Quiver", legendgroup="wrong", showlegend=True, 
                                 text=[str(pt) for node in wrong_nodes for pt in node], hoverinfo="text"))
             fig.add_trace(go.Scatter(x=[bary_to_cart(renormalize(pt))[0] for node in wrong_nodes for pt in node],
                                 y=[bary_to_cart(renormalize(pt))[1] for node in wrong_nodes for pt in node],
@@ -258,18 +276,18 @@ for col, sequence in zip(cols, sequences):
             fig.add_trace(go.Scatter(x=[cart[0] for cart, bary in all_nodes],
                                 y=[cart[1] for cart, bary in all_nodes],
                                 mode="markers", 
-                                marker=dict(color="purple", size=6), name="Nodes", showlegend=False, 
+                                marker=dict(color="rgb(0,120,150)", size=6), name="Nodes", showlegend=False, 
                                 text=[str(bary) for cart, bary in all_nodes], hoverinfo="text"))
             fig.add_trace(go.Scatter(x=[cart[0] for cart, bary in all_nodes],
                                 y=[cart[1] for cart, bary in all_nodes],
                                 mode="text", text=[str(bary) for cart, bary in all_nodes], 
                                 textposition="top center", legendgroup="Labels", name="Labels", visible="legendonly", hoverinfo="skip"))
 
-        # Optional: Polygone verbinden (NEU – ohne das bisherige Verhalten zu ändern)
+        
         if show_polygons:
             legend_shown = {"wrong": False, "correct": False, "neutral": False}
 
-            # Polygon aus den Given-Vektoren (Iteration 0)
+
             Given_cart = [bary_to_cart(pt) for pt in Given]
             if len(Given_cart) >= 3:
                 fig.add_trace(go.Scatter(
@@ -288,14 +306,14 @@ for col, sequence in zip(cols, sequences):
                     continue
 
                 if kind == "wrong":
-                    color, group = "red", "wrong"
+                    color, group = "rgb(180, 0, 0)", "wrong"
                 elif kind == "correct":
                     color, group = "green", "correct"
                 else:
                     color, group = "gray", "neutral"
 
-                if not use_arrows:
-                    color = "purple"
+                if not use_color:
+                    color = "rgb(0,120,150)"
 
                 # Polygon traces are part of the group but do NOT appear in the legend
                 fig.add_trace(go.Scatter(
@@ -303,15 +321,15 @@ for col, sequence in zip(cols, sequences):
                     y=[p[1] for p in nodes_iter] + [nodes_iter[0][1]],
                     mode="lines",
                     line=dict(color=color, width=2),
-                    name="",  # name is irrelevant since showlegend=False
-                    legendgroup=group,  # matches quiver traces
-                    showlegend=False,   # hide from legend
+                    name="",  
+                    legendgroup=group,  
+                    showlegend=False,   
                     hoverinfo="skip"
                 ))
 
 
 
-        # Given Dimension Vectors (wie ursprünglich)
+        # Given Dimension Vectors
         Given_cart = [bary_to_cart(pt) for pt in Given]
         fig.add_trace(go.Scatter(x=[p[0] for p in Given_cart],
                                 y=[p[1] for p in Given_cart],
