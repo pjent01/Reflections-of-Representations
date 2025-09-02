@@ -16,12 +16,15 @@ dimvecs_str = st.text_area(
 DimVecs_base = [[int(x) for x in line.split()] for line in dimvecs_str.strip().splitlines()]
 Given_base = [tuple(pt) for pt in DimVecs_base]
 
-# mehrere Sequenzen möglich
+# mehrere Sequenzen
 sequences_str = st.text_area("Enter sequences of reflections", "121323\n123123\n321321", height=145)
 sequences = [seq.strip() for seq in sequences_str.split() if seq.strip()]
 
 n = st.number_input("Number of iterations of the sequences", min_value=0, value=3, step=1)
 n = int(n)+1
+
+# Number of Lines
+m = 200
 
 BL = np.array([0, 0])                              # (0,0,1)
 TOP = np.array([0.5, math.sqrt(3) / 2])            # (0,1,0)
@@ -80,15 +83,17 @@ with col1:
             st.write("<b><span style='color:#228b22'>Correct Quiver</span></b>", unsafe_allow_html=True)
 
 with col2:
-    checkbox1_col, checkbox2_col = st.columns([1,1])
+    checkbox1_col, checkbox2_col, checkbox3_col = st.columns([1,1,1])
     with checkbox1_col:
         use_arrows = st.checkbox("Quivers", value=True, key="arrows_toggle")
     with checkbox2_col:
         show_polygons = st.checkbox("Polygons", value=True, key="polygons_toggle")
-
+    with checkbox3_col:
+        show_lines = st.checkbox("Lines", value=True, key="lines_toggle")
 # --------------------
 # Mehrere Sequenzen parallel
 # --------------------
+
 cols = st.columns(len(sequences)) 
 
 for col, sequence in zip(cols, sequences):
@@ -205,7 +210,7 @@ for col, sequence in zip(cols, sequences):
                     output.append(f"<span style='color:{line_color}'>{text2}</span>")
 
         # --------------------
-        # Zusätzliche Geometrie: Dreieck und Ellipse (wie ursprünglich)
+        # Zusätzliche Geometrie: Dreieck und Ellipse 
         # --------------------
         extra_triangle_bary = [(0,1,1),(1,1,0),(1,1,1)]
         extra_triangle_cart = [bary_to_cart(p) for p in extra_triangle_bary] + [bary_to_cart(extra_triangle_bary[0])]
@@ -228,7 +233,7 @@ for col, sequence in zip(cols, sequences):
         ellipse_cart = np.array([center + eigvecs @ (axes_lengths * np.array([np.cos(t), np.sin(t)])) for t in theta])
 
         # --------------------
-        # Plotly figure (wie ursprünglich)
+        # Plotly figure 
         # --------------------
         fig = go.Figure()
 
@@ -245,6 +250,45 @@ for col, sequence in zip(cols, sequences):
         # Ellipse
         fig.add_trace(go.Scatter(x=ellipse_cart[:, 0], y=ellipse_cart[:, 1],
                                 mode="lines", line=dict(color="black", width=2), name="Ellipse", showlegend=False, hoverinfo="skip"))
+
+        # Lines from Simples
+        def add_line(fig, bary1, bary2, color="rgba(0,0,0,0.6)", width=2):
+            p1, p2 = bary_to_cart(bary1), bary_to_cart(bary2)
+            fig.add_trace(go.Scatter(
+                x=[p1[0], p2[0]],
+                y=[p1[1], p2[1]],
+                mode="lines",
+                line=dict(color=color, width=width),
+                showlegend=False,
+                hoverinfo="skip"
+            ))
+        
+        def step_size(k):
+            if k < 20:
+                return 1   # every line
+            elif k < 40:
+                return 2   # every 2nd line
+            elif k < 60:
+                return 5   # every 5th line
+            elif k < 80:
+                return 10  # every 10th line
+            else:
+                return 20  
+
+        if show_lines:
+            # From (0,0,1)
+            k = 1
+            while k < m:
+                add_line(fig, (0,0,1), (k+1,k,0))
+                add_line(fig, (0,0,1), (k,k+1,0))
+                k += step_size(k)
+
+            # From (1,0,0)
+            k = 1
+            while k < m:
+                add_line(fig, (1,0,0), (0,k,k+1))
+                add_line(fig, (1,0,0), (0,k+1,k))
+                k += step_size(k)
 
         if use_color:
             # Red nodes: wrong1 + wrong2
@@ -326,8 +370,6 @@ for col, sequence in zip(cols, sequences):
                     showlegend=False,   
                     hoverinfo="skip"
                 ))
-
-
 
         # Given Dimension Vectors
         Given_cart = [bary_to_cart(pt) for pt in Given]
