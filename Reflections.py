@@ -23,8 +23,130 @@ sequences = [seq.strip() for seq in sequences_str.split() if seq.strip()]
 n = st.number_input("Number of iterations of the sequences", min_value=0, value=3, step=1)
 n = int(n)+1
 
-# Number of Lines
-m = 200
+# Exceptionals
+def gen_excep(n, num_iterations):
+    excep = []
+
+    for k in range(n):
+        nodes = []
+        B1 = [k+1, k, 2*k]
+        B2 = [2*k*(k+1), 2*k*k, 2*k*(2*k)-1]
+        nodes.append(B1)
+        nodes.append(B2)
+        
+        # Recursion for further nodes
+        for i in range(2, num_iterations):
+            B_prev = nodes[-1]
+            B_prev2 = nodes[-2]
+            B_next = [2*k*B_prev[j] - B_prev2[j] for j in range(3)]
+            nodes.append(B_next)
+        
+        excep.append(nodes)
+        # -----------------------
+        # Family 1: B1 = (k, k+1, 2*(k+1))
+        # -----------------------
+        nodes1 = []
+        B1 = [k, k+1, 2*(k+1)]
+        B2 = [2*(k+1)*B1[i] - v for i, v in enumerate([0,0,1])]
+        nodes1.append(B1)
+        nodes1.append(B2)
+        for i in range(2, num_iterations):
+            B_prev = nodes1[-1]
+            B_prev2 = nodes1[-2]
+            B_next = [2*(k+1)*B_prev[j] - B_prev2[j] for j in range(3)]
+            nodes1.append(B_next)
+        excep.append(nodes1)
+
+        # -----------------------
+        # Family 2: B1 = (2*k, k, k+1)
+        # -----------------------
+        nodes2 = []
+        B1 = [2*k, k, k+1]
+        B2 = [2*k*B1[i] - v for i, v in enumerate([1,0,0])]
+        nodes2.append(B1)
+        nodes2.append(B2)
+        for i in range(2, num_iterations):
+            B_prev = nodes2[-1]
+            B_prev2 = nodes2[-2]
+            B_next = [2*k*B_prev[j] - B_prev2[j] for j in range(3)]
+            nodes2.append(B_next)
+        excep.append(nodes2)
+
+        # -----------------------
+        # Family 3: B1 = (2*(k+1), k+1, k)
+        # -----------------------
+        nodes3 = []
+        B1 = [2*(k+1), k+1, k]
+        B2 = [2*(k+1)*B1[i] - v for i, v in enumerate([1,0,0])]
+        nodes3.append(B1)
+        nodes3.append(B2)
+        for i in range(2, num_iterations):
+            B_prev = nodes3[-1]
+            B_prev2 = nodes3[-2]
+            B_next = [2*(k+1)*B_prev[j] - B_prev2[j] for j in range(3)]
+            nodes3.append(B_next)
+        excep.append(nodes3)
+
+        # Recursion 5
+        nodes5 = []
+        B1 = [k+1, k, 0]
+        B2 = [2*k*(k+1), 2*k*k, 1]
+        nodes5.append(B1)
+        nodes5.append(B2)
+        
+        for i in range(2, num_iterations):
+            B_prev = nodes5[-1]
+            B_prev2 = nodes5[-2]
+            B_next = [2*k*B_prev[j] - B_prev2[j] for j in range(3)]
+            nodes5.append(B_next)
+        excep.append(nodes5)
+
+        # Recursion 6
+        nodes6 = []
+        B1 = [k, k+1, 0]
+        B2 = [2*(k+1)*k, 2*(k+1)*(k+1), 1]
+        nodes6.append(B1)
+        nodes6.append(B2)
+        
+        for i in range(2, num_iterations):
+            B_prev = nodes6[-1]
+            B_prev2 = nodes6[-2]
+            B_next = [2*k*B_prev[j] - B_prev2[j] for j in range(3)]
+            nodes6.append(B_next)
+        excep.append(nodes6)
+    
+        # Recursion 7
+        nodes7 = []
+        B1 = [0, k+1, k]
+        B2 = [1, 2*(k+1)*(k+1), 2*(k+1)*k]
+        nodes7.append(B1)
+        nodes7.append(B2)
+        
+        for i in range(2, num_iterations):
+            B_prev = nodes7[-1]
+            B_prev2 = nodes7[-2]
+            B_next = [2*k*B_prev[j] - B_prev2[j] for j in range(3)]
+            nodes7.append(B_next)
+        excep.append(nodes7)
+
+        # Recursion 8
+        nodes8 = []
+        B1 = [0, k, k+1]
+        B2 = [1, 2*k*k, 2*k*(k+1)]
+        nodes8.append(B1)
+        nodes8.append(B2)
+        
+        for i in range(2, num_iterations):
+            B_prev = nodes8[-1]
+            B_prev2 = nodes8[-2]
+            B_next = [2*k*B_prev[j] - B_prev2[j] for j in range(3)]
+            nodes8.append(B_next)
+        excep.append(nodes8)
+    
+    return excep
+
+
+
 
 BL = np.array([0, 0])                              # (0,0,1)
 TOP = np.array([0.5, math.sqrt(3) / 2])            # (0,1,0)
@@ -70,16 +192,19 @@ def arrow_symbol(mode="updown"):
 
 col1,col2,col3 = st.columns([1,1,1])
 with col1:
-    col1_1,col1_2,col1_3 = st.columns([1,1,2])
+    col1_1,col1_2,col1_3,col1_4 = st.columns([2,1,3,3])
     with col1_1:
         use_color = st.checkbox("Color", value=True, key="color_toggle")
     with col1_2:
         if use_color:
-            st.write("\n")
-            st.write("<b><span style='color:rgb(180, 0, 0)'>Wrong Quiver</span></b>", unsafe_allow_html=True)
+            show_wrong = st.checkbox("", value = True)
     with col1_3:
         if use_color:
-            st.write("\n")
+            #st.write("\n")
+            st.write("<b><span style='color:rgb(180, 0, 0)'>Wrong Quiver</span></b>", unsafe_allow_html=True)
+    with col1_4:
+        if use_color:
+            #st.write("\n")
             st.write("<b><span style='color:#228b22'>Correct Quiver</span></b>", unsafe_allow_html=True)
 
 with col2:
@@ -90,11 +215,19 @@ with col2:
         show_polygons = st.checkbox("Polygons", value=True, key="polygons_toggle")
     with checkbox3_col:
         show_lines = st.checkbox("Lines", value=True, key="lines_toggle")
+
+# Number of Lines
+if show_lines:
+    m = st.number_input("Number of Lines", min_value=0, value=200, step=1)
+    o = st.number_input("Number of Exceptional Sequences", min_value=0, value=10, step=1)
+    l = st.number_input("Depth of Exceptional Sequences", min_value=0, value=5, step=1)
+
 # --------------------
 # Mehrere Sequenzen parallel
 # --------------------
 
 cols = st.columns(len(sequences)) 
+nodes_cor = []
 
 for col, sequence in zip(cols, sequences):
     with col:
@@ -198,7 +331,14 @@ for col, sequence in zip(cols, sequences):
                 text1 = f"{arrow}  Reflection: {' '.join([f'{d}' for d in digits])}"
                 if line_color == "green":
                     text1 = f"<b>{text1}</b>"
-                output.append(f"<span style='color:{line_color}'>{text1}</span>")
+                    output.append(f"<span style='color:{line_color}'>{text1}</span>")
+                if line_color == "rgb(180, 0, 0)":
+                    if use_color:   
+                        if show_wrong:
+                            output.append(f"<span style='color:{line_color}'>{text1}</span>")            
+                if line_color == "black":
+                    output.append(f"<span style='color:{line_color}'>{text1}</span>")
+              
 
         
                 for idx, (A,B,C) in enumerate(DimVecs, 1):
@@ -207,7 +347,11 @@ for col, sequence in zip(cols, sequences):
                     text2 = f"&nbsp;&nbsp;&nbsp;&nbsp;P{idx}: ({A}, {B}, {C})"
                     if line_color == "green":
                         text2 = f"<b>{text2}</b>"
-                    output.append(f"<span style='color:{line_color}'>{text2}</span>")
+                        output.append(f"<span style='color:{line_color}'>{text2}</span>")
+                    if line_color == "rgb(180, 0, 0)":
+                        if use_color:
+                            if show_wrong:
+                                output.append(f"<span style='color:{line_color}'>{text2}</span>")
 
         # --------------------
         # Zusätzliche Geometrie: Dreieck und Ellipse 
@@ -262,7 +406,7 @@ for col, sequence in zip(cols, sequences):
                 showlegend=False,
                 hoverinfo="skip"
             ))
-        
+
         def step_size(k):
             if k < 20:
                 return 1   # every line
@@ -289,19 +433,39 @@ for col, sequence in zip(cols, sequences):
                 add_line(fig, (1,0,0), (0,k,k+1))
                 add_line(fig, (1,0,0), (0,k+1,k))
                 k += step_size(k)
+            
+            # Exceptionals
+            excep_t = gen_excep(o,l)
+            excep = [node for nodes_k in excep_t for node in nodes_k]
+            excep_cart = [bary_to_cart(renormalize(pt)) for pt in excep]
+            fig.add_trace(go.Scatter(
+                x=[p[0] for p in excep_cart],
+                y=[p[1] for p in excep_cart],
+                mode="markers",
+                marker=dict(color="black", size=6),
+                text=[str(pt) for pt in excep],
+                textposition="top center",
+                name="Exceptionals",
+                showlegend=False,
+                hoverinfo="text"))
+            fig.add_trace(go.Scatter(x=[p[0] for p in excep_cart],
+                y=[p[1] for p in excep_cart],
+                mode="text", text=[str(pt) for pt in excep], showlegend=False,
+                textposition="top center", legendgroup="Labels", visible="legendonly", hoverinfo="skip"))
 
         if use_color:
             # Red nodes: wrong1 + wrong2
-            wrong_nodes = wrong1 + wrong2
-            fig.add_trace(go.Scatter(x=[bary_to_cart(renormalize(pt))[0] for node in wrong_nodes for pt in node],
-                                y=[bary_to_cart(renormalize(pt))[1] for node in wrong_nodes for pt in node],
-                                mode="markers", 
-                                marker=dict(color="rgb(180, 0, 0)", size=6), name="Wrong Quiver", legendgroup="wrong", showlegend=True, 
-                                text=[str(pt) for node in wrong_nodes for pt in node], hoverinfo="text"))
-            fig.add_trace(go.Scatter(x=[bary_to_cart(renormalize(pt))[0] for node in wrong_nodes for pt in node],
-                                y=[bary_to_cart(renormalize(pt))[1] for node in wrong_nodes for pt in node],
-                                mode="text", text=[str(pt) for node in wrong_nodes for pt in node], showlegend=False,
-                                textposition="top center", legendgroup="Labels", visible="legendonly", hoverinfo="skip"))
+            if show_wrong:
+                wrong_nodes = wrong1 + wrong2
+                fig.add_trace(go.Scatter(x=[bary_to_cart(renormalize(pt))[0] for node in wrong_nodes for pt in node],
+                                    y=[bary_to_cart(renormalize(pt))[1] for node in wrong_nodes for pt in node],
+                                    mode="markers", 
+                                    marker=dict(color="rgb(180, 0, 0)", size=6), name="Wrong Quiver", legendgroup="wrong", showlegend=True, 
+                                    text=[str(pt) for node in wrong_nodes for pt in node], hoverinfo="text"))
+                fig.add_trace(go.Scatter(x=[bary_to_cart(renormalize(pt))[0] for node in wrong_nodes for pt in node],
+                                    y=[bary_to_cart(renormalize(pt))[1] for node in wrong_nodes for pt in node],
+                                    mode="text", text=[str(pt) for node in wrong_nodes for pt in node], showlegend=False,
+                                    textposition="top center", legendgroup="Labels", visible="legendonly", hoverinfo="skip"))
 
             # Green nodes: correct1 + correct2
             correct_nodes = correct1 + correct2
@@ -348,29 +512,46 @@ for col, sequence in zip(cols, sequences):
             for nodes_iter, kind in zip(nodes, poly_kind):
                 if len(nodes_iter) < 3:
                     continue
-
+            
                 if kind == "wrong":
                     color, group = "rgb(180, 0, 0)", "wrong"
                 elif kind == "correct":
                     color, group = "green", "correct"
+                    nodes_cor.append(nodes_iter)
                 else:
                     color, group = "gray", "neutral"
-
+                   
                 if not use_color:
                     color = "rgb(0,120,150)"
 
-                # Polygon traces are part of the group but do NOT appear in the legend
-                fig.add_trace(go.Scatter(
-                    x=[p[0] for p in nodes_iter] + [nodes_iter[0][0]],
-                    y=[p[1] for p in nodes_iter] + [nodes_iter[0][1]],
-                    mode="lines",
-                    line=dict(color=color, width=2),
-                    name="",  
-                    legendgroup=group,  
-                    showlegend=False,   
-                    hoverinfo="skip"
-                ))
-
+                
+            # Polygon traces are part of the group but do NOT appear in the legend
+                if use_color:
+                    if show_wrong:
+                        fig.add_trace(go.Scatter(
+                            x=[p[0] for p in nodes_iter] + [nodes_iter[0][0]],
+                            y=[p[1] for p in nodes_iter] + [nodes_iter[0][1]],
+                            mode="lines",
+                            line=dict(color=color, width=2),
+                            name="",  
+                            legendgroup=group,  
+                            showlegend=False,   
+                            hoverinfo="skip"
+                        ))
+                    
+                    else:
+                        for nodes_c in nodes_cor:
+                            fig.add_trace(go.Scatter(
+                                x=[p[0] for p in nodes_c] + [nodes_c[0][0]],
+                                y=[p[1] for p in nodes_c] + [nodes_c[0][1]],
+                                mode="lines",
+                                line=dict(color=color, width=2),
+                                name="",  
+                                legendgroup=group,  
+                                showlegend=False,   
+                                hoverinfo="skip"
+                            ))
+                                            
         # Given Dimension Vectors
         Given_cart = [bary_to_cart(pt) for pt in Given]
         fig.add_trace(go.Scatter(x=[p[0] for p in Given_cart],
