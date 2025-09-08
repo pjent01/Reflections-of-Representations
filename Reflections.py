@@ -192,7 +192,7 @@ def arrow_symbol(mode="updown"):
 
 col1,col2,col3 = st.columns([1,1,1])
 with col1:
-    col1_1,col1_2,col1_3,col1_4 = st.columns([2,1,3,3])
+    col1_1,col1_2,col1_3,col1_4 = st.columns([4,1,6,6])
     with col1_1:
         use_color = st.checkbox("Color", value=True, key="color_toggle")
     with col1_2:
@@ -200,11 +200,11 @@ with col1:
             show_wrong = st.checkbox("", value = True)
     with col1_3:
         if use_color:
-            #st.write("\n")
+            st.write("\n")
             st.write("<b><span style='color:rgb(180, 0, 0)'>Wrong Quiver</span></b>", unsafe_allow_html=True)
     with col1_4:
         if use_color:
-            #st.write("\n")
+            st.write("\n")
             st.write("<b><span style='color:#228b22'>Correct Quiver</span></b>", unsafe_allow_html=True)
 
 with col2:
@@ -396,7 +396,7 @@ for col, sequence in zip(cols, sequences):
                                 mode="lines", line=dict(color="black", width=2), name="Ellipse", showlegend=False, hoverinfo="skip"))
 
         # Lines from Simples
-        def add_line(fig, bary1, bary2, color="rgba(0,0,0,0.6)", width=2):
+        def add_line(fig, bary1, bary2, color="rgba(0,0,0,0.4)", width=2):
             p1, p2 = bary_to_cart(bary1), bary_to_cart(bary2)
             fig.add_trace(go.Scatter(
                 x=[p1[0], p2[0]],
@@ -442,7 +442,7 @@ for col, sequence in zip(cols, sequences):
                 x=[p[0] for p in excep_cart],
                 y=[p[1] for p in excep_cart],
                 mode="markers",
-                marker=dict(color="black", size=6),
+                marker=dict(color="rgba(0,0,0,0.4)", size=4),
                 text=[str(pt) for pt in excep],
                 textposition="top center",
                 name="Exceptionals",
