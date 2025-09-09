@@ -28,66 +28,61 @@ def gen_excep(n, num_iterations):
     excep = []
 
     for k in range(n):
-        nodes = []
+    # Recursion 1
+        nodes1 = []
         B1 = [k+1, k, 2*k]
         B2 = [2*k*(k+1), 2*k*k, 2*k*(2*k)-1]
-        nodes.append(B1)
-        nodes.append(B2)
-        
-        # Recursion for further nodes
-        for i in range(2, num_iterations):
-            B_prev = nodes[-1]
-            B_prev2 = nodes[-2]
-            B_next = [2*k*B_prev[j] - B_prev2[j] for j in range(3)]
-            nodes.append(B_next)
-        
-        excep.append(nodes)
-        # -----------------------
-        # Family 1: B1 = (k, k+1, 2*(k+1))
-        # -----------------------
-        nodes1 = []
-        B1 = [k, k+1, 2*(k+1)]
-        B2 = [2*(k+1)*B1[i] - v for i, v in enumerate([0,0,1])]
         nodes1.append(B1)
         nodes1.append(B2)
+        
         for i in range(2, num_iterations):
             B_prev = nodes1[-1]
             B_prev2 = nodes1[-2]
-            B_next = [2*(k+1)*B_prev[j] - B_prev2[j] for j in range(3)]
+            B_next = [2*k*B_prev[j] - B_prev2[j] for j in range(3)]
             nodes1.append(B_next)
+        
         excep.append(nodes1)
 
-        # -----------------------
-        # Family 2: B1 = (2*k, k, k+1)
-        # -----------------------
+    # Recursion 2
         nodes2 = []
-        B1 = [2*k, k, k+1]
-        B2 = [2*k*B1[i] - v for i, v in enumerate([1,0,0])]
+        B1 = [k, k+1, 2*(k+1)]
+        B2 = [2*(k+1)*B1[i] - v for i, v in enumerate([0,0,1])]
         nodes2.append(B1)
         nodes2.append(B2)
         for i in range(2, num_iterations):
             B_prev = nodes2[-1]
             B_prev2 = nodes2[-2]
-            B_next = [2*k*B_prev[j] - B_prev2[j] for j in range(3)]
+            B_next = [2*(k+1)*B_prev[j] - B_prev2[j] for j in range(3)]
             nodes2.append(B_next)
         excep.append(nodes2)
 
-        # -----------------------
-        # Family 3: B1 = (2*(k+1), k+1, k)
-        # -----------------------
+    # Recursion 3
         nodes3 = []
-        B1 = [2*(k+1), k+1, k]
-        B2 = [2*(k+1)*B1[i] - v for i, v in enumerate([1,0,0])]
+        B1 = [2*k, k, k+1]
+        B2 = [2*k*B1[i] - v for i, v in enumerate([1,0,0])]
         nodes3.append(B1)
         nodes3.append(B2)
         for i in range(2, num_iterations):
             B_prev = nodes3[-1]
             B_prev2 = nodes3[-2]
-            B_next = [2*(k+1)*B_prev[j] - B_prev2[j] for j in range(3)]
+            B_next = [2*k*B_prev[j] - B_prev2[j] for j in range(3)]
             nodes3.append(B_next)
         excep.append(nodes3)
 
-        # Recursion 5
+    # Recursion 4
+        nodes4 = []
+        B1 = [2*(k+1), k+1, k]
+        B2 = [2*(k+1)*B1[i] - v for i, v in enumerate([1,0,0])]
+        nodes4.append(B1)
+        nodes4.append(B2)
+        for i in range(2, num_iterations):
+            B_prev = nodes4[-1]
+            B_prev2 = nodes4[-2]
+            B_next = [2*(k+1)*B_prev[j] - B_prev2[j] for j in range(3)]
+            nodes4.append(B_next)
+        excep.append(nodes4)
+
+    # Recursion 5
         nodes5 = []
         B1 = [k+1, k, 0]
         B2 = [2*k*(k+1), 2*k*k, 1]
@@ -101,7 +96,7 @@ def gen_excep(n, num_iterations):
             nodes5.append(B_next)
         excep.append(nodes5)
 
-        # Recursion 6
+    # Recursion 6
         nodes6 = []
         B1 = [k, k+1, 0]
         B2 = [2*(k+1)*k, 2*(k+1)*(k+1), 1]
@@ -111,11 +106,11 @@ def gen_excep(n, num_iterations):
         for i in range(2, num_iterations):
             B_prev = nodes6[-1]
             B_prev2 = nodes6[-2]
-            B_next = [2*k*B_prev[j] - B_prev2[j] for j in range(3)]
+            B_next = [2*(k+1)*B_prev[j] - B_prev2[j] for j in range(3)]
             nodes6.append(B_next)
         excep.append(nodes6)
     
-        # Recursion 7
+    # Recursion 7
         nodes7 = []
         B1 = [0, k+1, k]
         B2 = [1, 2*(k+1)*(k+1), 2*(k+1)*k]
@@ -125,11 +120,11 @@ def gen_excep(n, num_iterations):
         for i in range(2, num_iterations):
             B_prev = nodes7[-1]
             B_prev2 = nodes7[-2]
-            B_next = [2*k*B_prev[j] - B_prev2[j] for j in range(3)]
+            B_next = [2*(k+1)*B_prev[j] - B_prev2[j] for j in range(3)]
             nodes7.append(B_next)
         excep.append(nodes7)
 
-        # Recursion 8
+    # Recursion 8
         nodes8 = []
         B1 = [0, k, k+1]
         B2 = [1, 2*k*k, 2*k*(k+1)]
