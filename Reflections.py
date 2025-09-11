@@ -556,7 +556,7 @@ for col, sequence in zip(cols, sequences):
                                 y=[p[1] for p in Given_cart],
                                 mode="markers", 
                                 marker=dict(color="blue", size=6), name="Nodes", showlegend=False, 
-                                text=(str(pt) for pt in Given), hoverinfo="text"))
+                                text=[str(pt) for pt in Given], hoverinfo="text"))
         fig.add_trace(go.Scatter(x=[p[0] for p in Given_cart],
                                 y=[p[1] for p in Given_cart],
                                 mode="text", text=[str(pt) for pt in Given], 
