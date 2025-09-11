@@ -17,10 +17,10 @@ DimVecs_base = [[int(x) for x in line.split()] for line in dimvecs_str.strip().s
 Given_base = [tuple(pt) for pt in DimVecs_base]
 
 # mehrere Sequenzen
-sequences_str = st.text_area("Enter sequences of reflections", "121323\n123123\n321321", height=145)
+sequences_str = st.text_area("Enter sequences of reflections", "12132", height=145)
 sequences = [seq.strip() for seq in sequences_str.split() if seq.strip()]
 
-n = st.number_input("Number of iterations of the sequences", min_value=0, value=3, step=1)
+n = st.number_input("Number of iterations of the sequences", min_value=0, value=1, step=1)
 n = int(n)+1
 
 # Exceptionals
@@ -571,7 +571,7 @@ for col, sequence in zip(cols, sequences):
                                 textposition="top center", hoverinfo="skip", showlegend=False))
 
         # Figure Layout
-        fig.update_layout(width=500, height=500, 
+        fig.update_layout(width=800, height=800, 
                         xaxis=dict(scaleanchor="y", showgrid=False, zeroline=False, showticklabels=False, title=None),
                         yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, title=None),
                         margin=dict(l=0, r=80, t=0, b=0),
