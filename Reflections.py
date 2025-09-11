@@ -483,10 +483,10 @@ for col, sequence in zip(cols, sequences):
                                 y=[cart[1] for cart, bary in all_nodes],
                                 mode="markers", 
                                 marker=dict(color="rgb(0,120,150)", size=6), name="Nodes", showlegend=False, 
-                                text=[f"({a}, {b}, {c})" for (a,b,c) in all_nodes])", hoverinfo="text"))
+                                text=[f"({a}, {b}, {c})" for cart, (a,b,c) in all_nodes])", hoverinfo="text"))
             fig.add_trace(go.Scatter(x=[cart[0] for cart, bary in all_nodes],
                                 y=[cart[1] for cart, bary in all_nodes],
-                                mode="text", text=[f"({a}, {b}, {c})" for (a,b,c) in all_nodes], 
+                                mode="text", text=[f"({a}, {b}, {c})" for cart, (a,b,c) in all_nodes], 
                                 textposition="top center", textfont=dict(size=label_size), legendgroup="Labels", name="Labels", visible="legendonly", hoverinfo="skip"))
 
         
