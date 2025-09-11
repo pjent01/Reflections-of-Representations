@@ -440,14 +440,14 @@ for col, sequence in zip(cols, sequences):
                 y=[p[1] for p in excep_cart],
                 mode="markers",
                 marker=dict(color="rgba(0,0,0,0.4)", size=4),
-                text="([str(pt) for pt in excep])",
+                text=[f"({a}, {b}, {c})" for (a,b,c) in excep],
                 textposition="top center",
                 name="Exceptionals",
                 showlegend=False,
                 hoverinfo="text"))
             fig.add_trace(go.Scatter(x=[p[0] for p in excep_cart],
                 y=[p[1] for p in excep_cart],
-                mode="text", text="([str(pt) for pt in excep])", showlegend=False,
+                mode="text", text=[f"({a}, {b}, {c})" for (a,b,c) in excep], showlegend=False,
                 textposition="top center", textfont=dict(size=label_size),
                 legendgroup="Labels", visible="legendonly", hoverinfo="skip"))
 
@@ -459,10 +459,10 @@ for col, sequence in zip(cols, sequences):
                                     y=[bary_to_cart(renormalize(pt))[1] for node in wrong_nodes for pt in node],
                                     mode="markers", 
                                     marker=dict(color="rgb(180, 0, 0)", size=6), name="Wrong Quiver", legendgroup="wrong", showlegend=True, 
-                                    text="([str(pt) for node in wrong_nodes for pt in node])", hoverinfo="text"))
+                                    text=[f"({a}, {b}, {c})" for node in wrong_nodes for (a,b,c) in node], hoverinfo="text"))
                 fig.add_trace(go.Scatter(x=[bary_to_cart(renormalize(pt))[0] for node in wrong_nodes for pt in node],
                                     y=[bary_to_cart(renormalize(pt))[1] for node in wrong_nodes for pt in node],
-                                    mode="text", text="([str(pt) for node in wrong_nodes for pt in node])", showlegend=False,
+                                    mode="text", text=[f"({a}, {b}, {c})" for node in wrong_nodes for (a,b,c) in node], showlegend=False,
                                     textposition="top center", textfont=dict(size=label_size), legendgroup="Labels", visible="legendonly", hoverinfo="skip"))
 
             # Green nodes: correct1 + correct2
@@ -471,10 +471,10 @@ for col, sequence in zip(cols, sequences):
                                 y=[bary_to_cart(renormalize(pt))[1] for node in correct_nodes for pt in node],
                                 mode="markers", 
                                 marker=dict(color="green", size=6), name="Correct Quiver", legendgroup="correct",showlegend=True, 
-                                text="([str(pt) for node in correct_nodes for pt in node])", hoverinfo="text"))
+                                text=[f"({a}, {b}, {c})" for node in correct_nodes for (a,b,c) in node], hoverinfo="text"))
             fig.add_trace(go.Scatter(x=[bary_to_cart(renormalize(pt))[0] for node in correct_nodes for pt in node],
                                 y=[bary_to_cart(renormalize(pt))[1] for node in correct_nodes for pt in node],
-                                mode="text", text="([str(pt) for node in correct_nodes for pt in node])", legendrank=3,
+                                mode="text", text=[f"({a}, {b}, {c})" for node in correct_nodes for (a,b,c) in node], legendrank=3,
                                 textposition="top center", textfont=dict(size=label_size), legendgroup="Labels", name="Labels", visible="legendonly", hoverinfo="skip"))
 
         else:
@@ -483,10 +483,10 @@ for col, sequence in zip(cols, sequences):
                                 y=[cart[1] for cart, bary in all_nodes],
                                 mode="markers", 
                                 marker=dict(color="rgb(0,120,150)", size=6), name="Nodes", showlegend=False, 
-                                text="([str(bary) for cart, bary in all_nodes])", hoverinfo="text"))
+                                text=[f"({a}, {b}, {c})" for (a,b,c) in all_nodes])", hoverinfo="text"))
             fig.add_trace(go.Scatter(x=[cart[0] for cart, bary in all_nodes],
                                 y=[cart[1] for cart, bary in all_nodes],
-                                mode="text", text="([str(bary) for cart, bary in all_nodes])", 
+                                mode="text", text=[f"({a}, {b}, {c})" for (a,b,c) in all_nodes], 
                                 textposition="top center", textfont=dict(size=label_size), legendgroup="Labels", name="Labels", visible="legendonly", hoverinfo="skip"))
 
         
@@ -556,10 +556,10 @@ for col, sequence in zip(cols, sequences):
                                 y=[p[1] for p in Given_cart],
                                 mode="markers", 
                                 marker=dict(color="blue", size=6), name="Nodes", showlegend=False, 
-                                text="([str(pt) for pt in Given])", hoverinfo="text"))
+                                text=[f"({a}, {b}, {c})" for (a,b,c) in Given], hoverinfo="text"))
         fig.add_trace(go.Scatter(x=[p[0] for p in Given_cart],
                                 y=[p[1] for p in Given_cart],
-                                mode="text", text="([str(pt) for pt in Given])", 
+                                mode="text", text=[f"({a}, {b}, {c})" for (a,b,c) in Given], 
                                 textposition="top center", textfont=dict(size=label_size), legendgroup="Labels", name="Labels",visible="legendonly", hoverinfo="skip", showlegend=False))
 
         # Simple Dimension Vectors
