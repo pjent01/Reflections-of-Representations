@@ -16,6 +16,8 @@ dimvecs_str = st.text_area(
 DimVecs_base = [[int(x) for x in line.split()] for line in dimvecs_str.strip().splitlines()]
 Given_base = [tuple(pt) for pt in DimVecs_base]
 
+
+label_size = 14
 # mehrere Sequenzen
 sequences_str = st.text_area("Enter sequences of reflections", "12132", height=145)
 sequences = [seq.strip() for seq in sequences_str.split() if seq.strip()]
@@ -446,7 +448,8 @@ for col, sequence in zip(cols, sequences):
             fig.add_trace(go.Scatter(x=[p[0] for p in excep_cart],
                 y=[p[1] for p in excep_cart],
                 mode="text", text=[str(pt) for pt in excep], showlegend=False,
-                textposition="top center", legendgroup="Labels", visible="legendonly", hoverinfo="skip"))
+                textposition="top center", textfont=dict(size=label_size),
+                legendgroup="Labels", visible="legendonly", hoverinfo="skip"))
 
         if use_color:
             # Red nodes: wrong1 + wrong2
@@ -460,7 +463,7 @@ for col, sequence in zip(cols, sequences):
                 fig.add_trace(go.Scatter(x=[bary_to_cart(renormalize(pt))[0] for node in wrong_nodes for pt in node],
                                     y=[bary_to_cart(renormalize(pt))[1] for node in wrong_nodes for pt in node],
                                     mode="text", text=[str(pt) for node in wrong_nodes for pt in node], showlegend=False,
-                                    textposition="top center", legendgroup="Labels", visible="legendonly", hoverinfo="skip"))
+                                    textposition="top center", textfont=dict(size=label_size), legendgroup="Labels", visible="legendonly", hoverinfo="skip"))
 
             # Green nodes: correct1 + correct2
             correct_nodes = correct1 + correct2
@@ -472,7 +475,7 @@ for col, sequence in zip(cols, sequences):
             fig.add_trace(go.Scatter(x=[bary_to_cart(renormalize(pt))[0] for node in correct_nodes for pt in node],
                                 y=[bary_to_cart(renormalize(pt))[1] for node in correct_nodes for pt in node],
                                 mode="text", text=[str(pt) for node in correct_nodes for pt in node], legendrank=3,
-                                textposition="top center", legendgroup="Labels", name="Labels", visible="legendonly", hoverinfo="skip"))
+                                textposition="top center", textfont=dict(size=label_size), legendgroup="Labels", name="Labels", visible="legendonly", hoverinfo="skip"))
 
         else:
             # Reflected Dimension Vectors
@@ -484,7 +487,7 @@ for col, sequence in zip(cols, sequences):
             fig.add_trace(go.Scatter(x=[cart[0] for cart, bary in all_nodes],
                                 y=[cart[1] for cart, bary in all_nodes],
                                 mode="text", text=[str(bary) for cart, bary in all_nodes], 
-                                textposition="top center", legendgroup="Labels", name="Labels", visible="legendonly", hoverinfo="skip"))
+                                textposition="top center", textfont=dict(size=label_size), legendgroup="Labels", name="Labels", visible="legendonly", hoverinfo="skip"))
 
         
         if show_polygons:
@@ -557,18 +560,18 @@ for col, sequence in zip(cols, sequences):
         fig.add_trace(go.Scatter(x=[p[0] for p in Given_cart],
                                 y=[p[1] for p in Given_cart],
                                 mode="text", text=[str(pt) for pt in Given], 
-                                textposition="top center", legendgroup="Labels", name="Labels",visible="legendonly", hoverinfo="skip", showlegend=False))
+                                textposition="top center", textfont=dict(size=label_size), legendgroup="Labels", name="Labels",visible="legendonly", hoverinfo="skip", showlegend=False))
 
         # Simple Dimension Vectors
         fig.add_trace(go.Scatter(x=[BL[0]], y=[BL[1]-0.02],
                                 mode="text", text="(0,0,1)", 
-                                textposition="bottom center", hoverinfo="skip", showlegend=False))
+                                textposition="bottom center", textfont=dict(size=label_size), hoverinfo="skip", showlegend=False))
         fig.add_trace(go.Scatter(x=[BR[0]], y=[BR[1]-0.02],
                                 mode="text", text="(1,0,0)", 
-                                textposition="bottom center", hoverinfo="skip", showlegend=False))
+                                textposition="bottom center", textfont=dict(size=label_size), hoverinfo="skip", showlegend=False))
         fig.add_trace(go.Scatter(x=[TOP[0]], y=[TOP[1]+0.01],
                                 mode="text", text="(0,1,0)", 
-                                textposition="top center", hoverinfo="skip", showlegend=False))
+                                textposition="top center", textfont=dict(size=label_size), hoverinfo="skip", showlegend=False))
 
         # Figure Layout
         fig.update_layout(width=800, height=800, 
