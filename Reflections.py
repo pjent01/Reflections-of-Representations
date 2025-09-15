@@ -226,7 +226,8 @@ if show_lines:
 cols = st.columns(len(sequences)) 
 nodes_cor = []
 
-for col, sequence in zip(cols, sequences):
+for idx, (col, sequence) in enumerate(zip(cols, sequences)):
+    uid = f"seq{idx}"
     with col:
         st.subheader(f"Simplex Diagram ({sequence})")
 
@@ -583,7 +584,8 @@ for col, sequence in zip(cols, sequences):
                         autosize=True
                         )
 
-        st.plotly_chart(fig, use_container_width=False, width=200)
+        st.plotly_chart(fig, use_container_width=False, width=200, key=f"plotly_{uid}")
+
 
 
         st.subheader(f"Reflections ({sequence})")
