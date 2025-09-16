@@ -225,6 +225,10 @@ if show_lines:
 
 cols = st.columns(len(sequences)) 
 nodes_cor = []
+all_nodes_global = []        # all barycentric nodes across all sequences
+all_polygons_global = []     # polygons from each step
+all_correct_nodes = []       # correct quiver nodes
+all_wrong_nodes = []         # wrong quiver nodes
 
 for idx, (col, sequence) in enumerate(zip(cols, sequences)):
     uid = f"seq{idx}"
@@ -590,3 +594,126 @@ for idx, (col, sequence) in enumerate(zip(cols, sequences)):
 
         st.subheader(f"Reflections ({sequence})")
         st.markdown("  <br>  ".join(output), unsafe_allow_html=True)
+    
+    # NEW: collect for combined diagram
+        all_nodes_global.extend(all_nodes)             # all (cart, bary)
+        all_polygons_global.extend(nodes)              # all polygons (list of cart coords)
+        all_correct_nodes.extend(correct1 + correct2)  # correct steps
+        all_wrong_nodes.extend(wrong1 + wrong2)        # wrong steps
+
+# --------------------
+# Combined Simplex for All Sequences
+# --------------------
+fig = go.Figure()
+
+# Simplex
+simplex_cart = [BL, TOP, BR, BL]
+fig.add_trace(go.Scatter(
+    x=[p[0] for p in simplex_cart], y=[p[1] for p in simplex_cart],
+    mode="lines", line=dict(color="black", width=3),
+    fill="toself", fillcolor="rgba(230,230,230,0.2)",
+    name="Simplex", showlegend=False, hoverinfo="skip"
+))
+
+# Fundamental Domain (triangle)
+fig.add_trace(go.Scatter(
+    x=[p[0] for p in extra_triangle_cart], y=[p[1] for p in extra_triangle_cart],
+    mode="lines", line=dict(color="black", width=2),
+    name="Triangle", showlegend=False, hoverinfo="skip"
+))
+
+# Ellipse
+fig.add_trace(go.Scatter(
+    x=ellipse_cart[:, 0], y=ellipse_cart[:, 1],
+    mode="lines", line=dict(color="black", width=2),
+    name="Ellipse", showlegend=False, hoverinfo="skip"
+))
+
+# Wrong nodes (all sequences)
+if use_color and show_wrong:
+    fig.add_trace(go.Scatter(
+        x=[bary_to_cart(renormalize(pt))[0] for node in all_wrong_nodes for pt in node],
+        y=[bary_to_cart(renormalize(pt))[1] for node in all_wrong_nodes for pt in node],
+        mode="markers",
+        marker=dict(color="rgb(180,0,0)", size=6),
+        name="Wrong Quiver", legendgroup="wrong", showlegend=True,
+        text=[f"({a}, {b}, {c})" for node in all_wrong_nodes for (a,b,c) in node],
+        hoverinfo="text"
+    ))
+    # Optional barycentric labels (toggleable)
+    fig.add_trace(go.Scatter(
+        x=[bary_to_cart(renormalize(pt))[0] for node in all_wrong_nodes for pt in node],
+        y=[bary_to_cart(renormalize(pt))[1] for node in all_wrong_nodes for pt in node],
+        mode="text",
+        text=[f"({a}, {b}, {c})" for node in all_wrong_nodes for (a,b,c) in node],
+        showlegend=False, textposition="top center",
+        textfont=dict(size=label_size),
+        legendgroup="Labels", visible="legendonly", hoverinfo="skip"
+    ))
+
+# Correct nodes (all sequences)
+if use_color:
+    fig.add_trace(go.Scatter(
+        x=[bary_to_cart(renormalize(pt))[0] for node in all_correct_nodes for pt in node],
+        y=[bary_to_cart(renormalize(pt))[1] for node in all_correct_nodes for pt in node],
+        mode="markers",
+        marker=dict(color="green", size=6),
+        name="Correct Quiver", legendgroup="correct", showlegend=True,
+        text=[f"({a}, {b}, {c})" for node in all_correct_nodes for (a,b,c) in node],
+        hoverinfo="text"
+    ))
+    fig.add_trace(go.Scatter(
+        x=[bary_to_cart(renormalize(pt))[0] for node in all_correct_nodes for pt in node],
+        y=[bary_to_cart(renormalize(pt))[1] for node in all_correct_nodes for pt in node],
+        mode="text",
+        text=[f"({a}, {b}, {c})" for node in all_correct_nodes for (a,b,c) in node],
+        textposition="top center", textfont=dict(size=label_size),
+        legendgroup="Labels", name="Labels",
+        visible="legendonly", hoverinfo="skip"
+    ))
+
+# Given nodes (all sequences, blue)
+fig.add_trace(go.Scatter(
+    x=[bary_to_cart(pt)[0] for pt in Given],
+    y=[bary_to_cart(pt)[1] for pt in Given],
+    mode="markers",
+    marker=dict(color="blue", size=6),
+    name="Given Nodes", legendgroup="given", showlegend=True,
+    text=[f"({a}, {b}, {c})" for (a,b,c) in Given],
+    hoverinfo="text"
+))
+fig.add_trace(go.Scatter(
+    x=[bary_to_cart(pt)[0] for pt in Given],
+    y=[bary_to_cart(pt)[1] for pt in Given],
+    mode="text",
+    text=[f"({a}, {b}, {c})" for (a,b,c) in Given],
+    textposition="top center", textfont=dict(size=label_size),
+    legendgroup="Labels", visible="legendonly", hoverinfo="skip", showlegend=False
+))
+
+# Labels at simplex corners
+fig.add_trace(go.Scatter(x=[BL[0]], y=[BL[1]-0.02],
+                        mode="text", text="(0,0,1)",
+                        textposition="bottom center", textfont=dict(size=label_size),
+                        hoverinfo="skip", showlegend=False))
+fig.add_trace(go.Scatter(x=[BR[0]], y=[BR[1]-0.02],
+                        mode="text", text="(1,0,0)",
+                        textposition="bottom center", textfont=dict(size=label_size),
+                        hoverinfo="skip", showlegend=False))
+fig.add_trace(go.Scatter(x=[TOP[0]], y=[TOP[1]+0.01],
+                        mode="text", text="(0,1,0)",
+                        textposition="top center", textfont=dict(size=label_size),
+                        hoverinfo="skip", showlegend=False))
+
+# Layout
+fig.update_layout(
+    width=800, height=800,
+    xaxis=dict(scaleanchor="y", showgrid=False, zeroline=False, showticklabels=False, title=None),
+    yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, title=None),
+    margin=dict(l=0, r=80, t=0, b=0),
+    showlegend=True,
+    legend=dict(x=0.95, y=0.8),
+    autosize=True
+)
+
+st.plotly_chart(fig, use_container_width=False, key="plotly_combined")
