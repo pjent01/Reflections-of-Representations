@@ -13,8 +13,20 @@ dimvecs_str = st.text_area(
     "Enter dimension vectors (space-separated)",
     "0 1 0\n0 2 1\n1 2 1\n1 2 0", height=145
 )
-DimVecs_base = [[int(x) for x in line.split()] for line in dimvecs_str.strip().splitlines()]
+
+if dimvecs_str.strip(): 
+    DimVecs_base = [
+        [
+            int(val) if float(val).is_integer() else float(val)
+            for val in line.split()
+        ]
+        for line in dimvecs_str.strip().splitlines()
+    ]
+else:
+    DimVecs_base = []  
+
 Given_base = [tuple(pt) for pt in DimVecs_base]
+
 
 
 label_size = 14
@@ -361,22 +373,102 @@ for idx, (col, sequence) in enumerate(zip(cols, sequences)):
         extra_triangle_bary = [(0,1,1),(1,1,0),(1,1,1)]
         extra_triangle_cart = [bary_to_cart(p) for p in extra_triangle_bary] + [bary_to_cart(extra_triangle_bary[0])]
 
-        ellipse_points_bary = [(0,1,1),(1,1,0),(1,1,2),(2,1,1),(1,5,2)]
-        ellipse_points_cart = np.array([bary_to_cart(p) for p in ellipse_points_bary])
+        # Ellipse Computation
+        Q = np.array([[1.0, -1.0,  0.0],
+                    [-1.0, 1.0, -1.0],
+                    [0.0, -1.0,  1.0]])   # quadratic form for a^2+b^2+c^2-2ab-2bc
 
-        X, Y = [], []
-        for (x, y) in ellipse_points_cart:
-            X.append([x**2, x*y, y**2, x, y])
-            Y.append(-1.0)
-        X = np.array(X); Y = np.array(Y)
-        A, B, Cc, D, E = np.linalg.solve(X, Y); F_const = 1.0
-        M = np.array([[A, B/2],[B/2, Cc]])
-        center = np.linalg.solve(-2*M, [D, E])
-        F_c = F_const + np.dot(center, np.dot(M, center)) + D*center[0] + E*center[1]
-        eigvals, eigvecs = np.linalg.eigh(M)
-        axes_lengths = np.sqrt(-F_c / eigvals)
-        theta = np.linspace(0, 2*np.pi, 400)
-        ellipse_cart = np.array([center + eigvecs @ (axes_lengths * np.array([np.cos(t), np.sin(t)])) for t in theta])
+        # helper: analytic conversion + ellipse construction
+        def compute_conic_cart_points_analytic(n_theta=3000, keep_in_simplex=True, tol=1e-12, fallback_n_samples=4000):
+            # M,t map u=[a,b] -> [a,b,c] = M u + t with c = 1-a-b
+            M = np.array([[1.0, 0.0],
+                        [0.0, 1.0],
+                        [-1.0,-1.0]])
+            t = np.array([0.0, 0.0, 1.0])
+
+            # coefficients in u=(a,b)
+            A_u = M.T @ Q @ M         # 2x2
+            b_u = 2.0 * (M.T @ Q @ t) # 2x1
+            c0  = float(t.T @ Q @ t)  # scalar
+
+            # P maps u -> Cartesian y = x - BL : x = BL + P u
+            P = np.column_stack([BR - BL, TOP - BL])   # 2x2
+            try:
+                Pinv = np.linalg.inv(P)
+            except np.linalg.LinAlgError:
+                # degenerate simplex (should not happen), fallback to sampling
+                return _compute_conic_points_sample(fallback_n_samples, keep_in_simplex, tol)
+
+            # Quadratic in y = x - BL: y^T A_cart y + b_cart^T y + c0 = 0
+            A_cart = Pinv.T @ A_u @ Pinv
+            b_cart = Pinv.T @ b_u.reshape(2,1)   # column vector
+            c_cart = c0
+
+            # try to get center y0 solving 2 A_cart y0 + b_cart = 0
+            try:
+                y0 = -0.5 * np.linalg.solve(A_cart, b_cart).reshape(2)
+            except np.linalg.LinAlgError:
+                # nearly singular: fallback to dense sampling
+                return _compute_conic_points_sample(fallback_n_samples, keep_in_simplex, tol)
+
+            # value at center
+            F_c = float(y0 @ (A_cart @ y0) + (b_cart.ravel() @ y0) + c_cart)
+
+            # check ellipse condition: A_cart positive definite and F_c < 0 -> real axes
+            eigvals, eigvecs = np.linalg.eigh(A_cart)
+            if np.any(eigvals <= 0) or F_c >= 0:
+                # not a proper ellipse in this chart -> fallback to dense sampling
+                return _compute_conic_points_sample(fallback_n_samples, keep_in_simplex, tol)
+
+            # axis lengths and parametric points
+            axes = np.sqrt((-F_c) / eigvals)  # lengths along eigenvectors
+            center = BL + y0  # convert y0 back to absolute cartesian center
+
+            thetas = np.linspace(0, 2 * np.pi, n_theta, endpoint=True)
+            pts = np.array([center + (eigvecs @ (axes * np.array([np.cos(t), np.sin(t)]))) for t in thetas])
+
+            if keep_in_simplex:
+                # keep only points with bary coords >= -tol
+                upts = (Pinv @ (pts.T - BL.reshape(2,1))).T  # shape (N,2)
+                a_vals = upts[:,0]; b_vals = upts[:,1]; c_vals = 1.0 - a_vals - b_vals
+                mask = (a_vals >= -tol) & (b_vals >= -tol) & (c_vals >= -tol)
+                pts = pts[mask]
+                if pts.shape[0] > 0 and not np.allclose(pts[0], pts[-1]):
+                    pts = np.vstack([pts, pts[0]])
+            return pts
+
+        # fallback sampling routine with tighter tolerances
+        def _compute_conic_points_sample(n_samples, keep_in_simplex, tol):
+            a_min, a_max = -0.2, 1.2  # widen if you want more of the conic
+            pts = []
+            a_vals = np.linspace(a_min, a_max, n_samples)
+            for a in a_vals:
+                # quadratic in b after substituting c = 1-a-b
+                A = 4.0
+                B = 2.0 * a - 4.0
+                C = 2.0 * a * a - 2.0 * a + 1.0
+                disc = B*B - 4.0*A*C
+                if disc < -1e-12:
+                    continue
+                disc = max(disc, 0.0)
+                sqrt_disc = math.sqrt(disc)
+                for b in [(-B + sqrt_disc)/(2*A), (-B - sqrt_disc)/(2*A)]:
+                    c = 1.0 - a - b
+                    if keep_in_simplex and (a < -tol or b < -tol or c < -tol):
+                        continue
+                    cart = bary_to_cart(renormalize((a,b,c)))
+                    pts.append(cart)
+            if not pts:
+                return np.empty((0,2))
+            pts = np.array(pts)
+            # sort so trace looks nice
+            center = pts.mean(axis=0)
+            ang = np.arctan2(pts[:,1]-center[1], pts[:,0]-center[0])
+            pts = pts[np.argsort(ang)]
+            pts = np.vstack([pts, pts[0]])
+            return pts
+
+
 
         # --------------------
         # Plotly figure 
@@ -393,9 +485,74 @@ for idx, (col, sequence) in enumerate(zip(cols, sequences)):
         fig.add_trace(go.Scatter(x=[p[0] for p in extra_triangle_cart], y=[p[1] for p in extra_triangle_cart],
                                 mode="lines", line=dict(color="black", width=2), name="Triangle", showlegend=False, hoverinfo="skip"))
 
-        # Ellipse
-        fig.add_trace(go.Scatter(x=ellipse_cart[:, 0], y=ellipse_cart[:, 1],
-                                mode="lines", line=dict(color="black", width=2), name="Ellipse", showlegend=False, hoverinfo="skip"))
+        # Ellipse Plot
+        ellipse_cart = compute_conic_cart_points_analytic(n_theta=1200, keep_in_simplex=True, tol=1e-12)
+        if ellipse_cart.size > 0:
+            fig.add_trace(go.Scatter(x=ellipse_cart[:,0], y=ellipse_cart[:,1],
+                                    mode="lines", line=dict(color="black", width=2),
+                                    name="Conic (analytic)", showlegend=False, hoverinfo="skip"))
+
+
+        # Reflected Fundamental Domain
+        def triangles_from_special_subsequences(base_triangle, sequence):
+            """
+            Generate triangles only at specific subsequences:
+            - Start '13' or '31'
+            - Any subsequence '123', '321', '121', '323'
+            """
+            triangles = []
+            current = base_triangle[:]
+
+            # Step through sequence, applying transformations
+            for i, digit in enumerate(sequence):
+                action = digit_actions[digit]
+                current = action(current)
+
+                # Check the prefix/subsequence
+                prefix2 = sequence[:i+1]
+                if prefix2.startswith("13") or prefix2.startswith("31"):
+                    if len(prefix2) == 2:  # only at the very start
+                        triangles.append((i+1, current))
+
+                if i >= 2:  # check 3-length substrings ending here
+                    window = sequence[i-2:i+1]
+                    if window in {"123","321","121","323"}:
+                        triangles.append((i+1, current))
+
+            return triangles  # list of (step_index, triangle)
+
+        def add_triangle(fig, bary_points, color="rgba(50,150,250,0.4)", line_color=f"rgba(0,150,200, 0.3)"):
+            cart_points = [bary_to_cart(renormalize(pt)) for pt in bary_points]
+            cart_points.append(cart_points[0])  # close loop
+            fig.add_trace(go.Scatter(
+                x=[p[0] for p in cart_points],
+                y=[p[1] for p in cart_points],
+                mode="lines",
+                fill="toself",
+                fillcolor=color,
+                line=dict(color=line_color, width=2),
+                showlegend=False,
+                hoverinfo="skip"
+            ))
+        def apply_sequence_to_triangle(triangle, sequence):
+            triangles = [triangle]  # include starting triangle
+            current = triangle[:]
+            for digit in sequence:
+                action = digit_actions[digit]
+                current = action(current)   # transform all 3 vertices
+                triangles.append(current)
+            return triangles
+
+        triangles = []
+        DimVecs_tmp = []  # start fresh
+        for i in range(13):
+            # choose a digit (cycle through "123")
+            digit = str((i % 3) + 1)
+            DimVecs_tmp = digit_actions[digit](DimVecs_tmp)
+
+            if len(DimVecs_tmp) >= 3:
+                tri = DimVecs_tmp[:3]
+                triangles.append(tri)
 
         # Lines from Simples
         def add_line(fig, bary1, bary2, color="rgba(0,0,0,0.4)", width=2):
@@ -622,12 +779,40 @@ fig.add_trace(go.Scatter(
     name="Triangle", showlegend=False, hoverinfo="skip"
 ))
 
-# Ellipse
-fig.add_trace(go.Scatter(
-    x=ellipse_cart[:, 0], y=ellipse_cart[:, 1],
-    mode="lines", line=dict(color="black", width=2),
-    name="Ellipse", showlegend=False, hoverinfo="skip"
-))
+# Reflected Fundamental Domain
+base_triangle = [(0,1,1), (1,1,1), (1,1,0)]
+
+# Loop over all user sequences
+for seq in sequences:
+    special_tris = triangles_from_special_subsequences(base_triangle, seq)
+
+    for step, tri in special_tris:
+        # give each sequence its own color
+        color = f"rgba(0,150,200, 0.3)"
+        add_triangle(fig, tri, color=color)
+
+        # draw corner nodes
+        cart = [bary_to_cart(renormalize(pt)) for pt in tri]
+        fig.add_trace(go.Scatter(
+            x=[p[0] for p in cart],
+            y=[p[1] for p in cart],
+            mode="markers",
+            marker=dict(size=6, color=f"rgba(0,150,200, 0.3)"),
+            text=[f"{pt}" for pt in tri],
+            textposition="top center",
+            name=f"{seq} step {step}",
+            showlegend=False,
+            hoverinfo="text"
+        ))
+
+# Ellipse Plot
+ellipse_cart = compute_conic_cart_points_analytic(n_theta=1200, keep_in_simplex=True, tol=1e-12)
+if ellipse_cart.size > 0:
+    fig.add_trace(go.Scatter(x=ellipse_cart[:,0], y=ellipse_cart[:,1],
+                            mode="lines", line=dict(color="black", width=2),
+                            name="Conic (analytic)", showlegend=False, hoverinfo="skip"))
+
+
 
 # Wrong nodes (all sequences)
 if use_color and show_wrong:
