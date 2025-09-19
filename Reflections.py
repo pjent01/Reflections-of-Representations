@@ -1,6 +1,5 @@
 import streamlit as st
 import math
-import sympy as sp
 import numpy as np
 import plotly.graph_objects as go
 
