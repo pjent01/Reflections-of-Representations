@@ -1,5 +1,6 @@
 import streamlit as st
 import math
+import sympy as sp
 import numpy as np
 import plotly.graph_objects as go
 
@@ -26,7 +27,6 @@ else:
     DimVecs_base = []  
 
 Given_base = [tuple(pt) for pt in DimVecs_base]
-
 
 
 label_size = 14
@@ -195,6 +195,90 @@ def arrow_symbol(mode="updown"):
     elif mode == "downup":
         return "$\\begin{matrix} \\downarrow \\\\ \\uparrow\\end{matrix}$"
 
+# Reflected Lines
+def base_lines(m):
+    lines = []
+    for k in range(m):
+        # Family 1+2
+        disc1 = k**2 - 1
+        if disc1 >= 0:
+            sqrt_disc1 = np.sqrt(disc1)
+            x1 = k - sqrt_disc1
+            x2 = k + sqrt_disc1
+            lines.append((np.array([(k+1)*x1, k*x1, 1.0]), 
+                          np.array([(k+1)*x2, k*x2, 1.0]), k))
+            lines.append((np.array([1.0, k*x1, (k+1)*x1]),
+                          np.array([1.0, k*x2, (k+1)*x2]), k))
+
+        # Family 3+4
+        disc2 = (k+1)**2 - 1
+        if disc2 >= 0:
+            sqrt_disc2 = np.sqrt(disc2)
+            x1 = k+1 - sqrt_disc2
+            x2 = k+1 + sqrt_disc2
+            lines.append((np.array([k*x1, (k+1)*x1, 1.0]),
+                          np.array([k*x2, (k+1)*x2, 1.0]), k))
+            lines.append((np.array([1.0, (k+1)*x1, k*x1]),
+                          np.array([1.0, (k+1)*x2, k*x2]), k))
+    return lines
+
+
+
+def bary_line(p1, p2, n=200):
+    return [renormalize((1-t)*p1 + t*p2) for t in np.linspace(0, 1, n)]
+
+def apply_sequence(point, sequence):
+    current = [point]
+    for digit in sequence:
+        action = digit_actions[digit]
+        current = action(current)
+    return current[0]
+
+def matching_steps(sequence: str) -> list[int]:
+    steps = []
+
+    # Check start
+    if sequence.startswith("13") or sequence.startswith("31"):
+        steps.append(2)  # after first two digits
+
+    # Check all 3-length windows
+    for i in range(2, len(sequence)):
+        window = sequence[i-2:i+1]  # three digits ending at position i
+        if window in {"123","321","121","323"}:
+            steps.append(i+1)  # +1 because we want 1-based length
+
+    return steps
+
+
+
+def plot_line_steps(fig, sequence, line_pts, k=None, color="rgba(160,32,240,0.3)"):
+
+    steps = matching_steps(sequence)
+
+    for step in steps:
+        # Apply only the first 'step' digits of the sequence
+        seq_partial = sequence[:step]
+        line_transformed = [apply_sequence(pt, seq_partial) for pt in line_pts]
+        line_cart = np.array([bary_to_cart(pt) for pt in line_transformed])
+
+        # Plot the line
+        fig.add_trace(go.Scatter(
+            x=line_cart[:, 0],
+            y=line_cart[:, 1],
+            mode="lines",
+            line=dict(color=color, width=2),
+            name=f"Line k={k}, step={step}",
+            showlegend=False,
+            hoverinfo="text",
+            text=[f"Total Reflections: {step}, k={k}"]
+        ))
+
+       
+
+
+
+
+
 # --------------------
 # Layout
 # --------------------
@@ -224,10 +308,19 @@ with col2:
         show_polygons = st.checkbox("Polygons", value=True, key="polygons_toggle")
     with checkbox3_col:
         show_lines = st.checkbox("Lines", value=True, key="lines_toggle")
+    
+with col3:
+    checkbox4_col, checkbox5_col, checkbox6_col = st.columns([1,1,1])
+    with checkbox4_col:
+        show_one_simplex = st.checkbox("Simplex for all Sequences", value=False, key="one_simplex_toggle")
+    with checkbox5_col:
+        show_refl_triangles = st.checkbox("Reflected Fundamental Domain", value=False, key="refl_triangles_toggle")
+    with checkbox6_col:
+        show_refl_lines = st.checkbox("Reflected Lines", value=False, key="refl_lines_toggle")
 
 # Number of Lines
 if show_lines:
-    m = st.number_input("Number of Lines", min_value=0, value=100, step=1)
+    m = st.number_input("Number of Lines", min_value=0, value=10, step=1)
     o = st.number_input("Number of Exceptional Sequences", min_value=0, value=10, step=1)
     l = st.number_input("Depth of Exceptional Sequences", min_value=0, value=4, step=1)
 
@@ -245,7 +338,8 @@ all_wrong_nodes = []         # wrong quiver nodes
 for idx, (col, sequence) in enumerate(zip(cols, sequences)):
     uid = f"seq{idx}"
     with col:
-        st.subheader(f"Simplex Diagram ({sequence})")
+        if show_one_simplex == False:
+            st.subheader(f"Simplex Diagram ({sequence})")
 
         # Kopie der Startdaten für jede Sequenz
         DimVecs = [v[:] for v in DimVecs_base]
@@ -276,7 +370,7 @@ for idx, (col, sequence) in enumerate(zip(cols, sequences)):
                     DimVecs_cart = [bary_to_cart(pt) for pt in DimVecs_new]
                     nodes.append(DimVecs_cart)
 
-                    # Quiver Reflections (unverändert)
+                    # Quiver Reflections 
                     if q == [1,1]:
                         if digit == "1":
                             wrong1.append(DimVecs) 
@@ -554,6 +648,8 @@ for idx, (col, sequence) in enumerate(zip(cols, sequences)):
                 tri = DimVecs_tmp[:3]
                 triangles.append(tri)
 
+
+
         # Lines from Simples
         def add_line(fig, bary1, bary2, color="rgba(0,0,0,0.4)", width=2):
             p1, p2 = bary_to_cart(bary1), bary_to_cart(bary2)
@@ -744,13 +840,13 @@ for idx, (col, sequence) in enumerate(zip(cols, sequences)):
                         legend=dict(x=0.95,y=0.8),
                         autosize=True
                         )
+        if show_one_simplex == False:
+            st.plotly_chart(fig, use_container_width=False, width=200, key=f"plotly_{uid}")
 
-        st.plotly_chart(fig, use_container_width=False, width=200, key=f"plotly_{uid}")
 
 
-
-        st.subheader(f"Reflections ({sequence})")
-        st.markdown("  <br>  ".join(output), unsafe_allow_html=True)
+            st.subheader(f"Reflections ({sequence})")
+            st.markdown("  <br>  ".join(output), unsafe_allow_html=True)
     
     # NEW: collect for combined diagram
         all_nodes_global.extend(all_nodes)             # all (cart, bary)
@@ -761,6 +857,9 @@ for idx, (col, sequence) in enumerate(zip(cols, sequences)):
 # --------------------
 # Combined Simplex for All Sequences
 # --------------------
+if show_one_simplex == True:
+    st.subheader(f"Simplex Diagram for all Sequences")
+
 fig = go.Figure()
 
 # Simplex
@@ -780,30 +879,39 @@ fig.add_trace(go.Scatter(
 ))
 
 # Reflected Fundamental Domain
-base_triangle = [(0,1,1), (1,1,1), (1,1,0)]
+if show_refl_triangles == True:
+    base_triangle = [(0,1,1), (1,1,1), (1,1,0)]
 
-# Loop over all user sequences
-for seq in sequences:
-    special_tris = triangles_from_special_subsequences(base_triangle, seq)
+    for seq in sequences:
+        special_tris = triangles_from_special_subsequences(base_triangle, seq)
 
-    for step, tri in special_tris:
-        # give each sequence its own color
-        color = f"rgba(0,150,200, 0.3)"
-        add_triangle(fig, tri, color=color)
+        for step, tri in special_tris:
+            # give each sequence its own color
+            color = f"rgba(0,150,200, 0.3)"
+            add_triangle(fig, tri, color=color)
 
-        # draw corner nodes
-        cart = [bary_to_cart(renormalize(pt)) for pt in tri]
-        fig.add_trace(go.Scatter(
-            x=[p[0] for p in cart],
-            y=[p[1] for p in cart],
-            mode="markers",
-            marker=dict(size=6, color=f"rgba(0,150,200, 0.3)"),
-            text=[f"{pt}" for pt in tri],
-            textposition="top center",
-            name=f"{seq} step {step}",
-            showlegend=False,
-            hoverinfo="text"
-        ))
+            # draw corner nodes
+            cart = [bary_to_cart(renormalize(pt)) for pt in tri]
+            fig.add_trace(go.Scatter(
+                x=[p[0] for p in cart],
+                y=[p[1] for p in cart],
+                mode="markers",
+                marker=dict(size=6, color=f"rgba(0,150,200, 0.3)"),
+                text=[f"{pt}" for pt in tri],
+                textposition="top center",
+                name=f"{seq} step {step}",
+                showlegend=False,
+                hoverinfo="text"
+            ))
+
+# Reflected Lines
+if show_refl_lines:
+    all_lines = base_lines(m)  # returns list of (p1, p2, k)
+    for seq in sequences:
+        for (p1, p2, k) in all_lines:
+            # Make sure line_pts is a list of points
+            plot_line_steps(fig, seq, [p1, p2], k=k)
+
 
 # Ellipse Plot
 ellipse_cart = compute_conic_cart_points_analytic(n_theta=1200, keep_in_simplex=True, tol=1e-12)
@@ -812,7 +920,21 @@ if ellipse_cart.size > 0:
                             mode="lines", line=dict(color="black", width=2),
                             name="Conic (analytic)", showlegend=False, hoverinfo="skip"))
 
+# Lines from Simples
+if show_lines:
+    # From (0,0,1)
+    k = 1
+    while k < m:
+        add_line(fig, (0,0,1), (k+1,k,0))
+        add_line(fig, (0,0,1), (k,k+1,0))
+        k += step_size(k)
 
+    # From (1,0,0)
+    k = 1
+    while k < m:
+        add_line(fig, (1,0,0), (0,k,k+1))
+        add_line(fig, (1,0,0), (0,k+1,k))
+        k += step_size(k)
 
 # Wrong nodes (all sequences)
 if use_color and show_wrong:
@@ -901,4 +1023,6 @@ fig.update_layout(
     autosize=True
 )
 
-st.plotly_chart(fig, use_container_width=False, key="plotly_combined")
+if show_one_simplex == True:
+    st.plotly_chart(fig, use_container_width=False, key="plotly_combined")
+
