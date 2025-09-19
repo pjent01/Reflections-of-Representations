@@ -320,8 +320,8 @@ with col3:
 # Number of Lines
 if show_lines:
     m = st.number_input("Number of Lines", min_value=0, value=10, step=1)
-    o = st.number_input("Number of Exceptional Sequences", min_value=0, value=10, step=1)
-    l = st.number_input("Depth of Exceptional Sequences", min_value=0, value=4, step=1)
+    o = st.number_input("Number of Exceptional Sequences", min_value=0, value=5, step=1)
+    l = st.number_input("Depth of Exceptional Sequences", min_value=0, value=2, step=1)
 
 # --------------------
 # Mehrere Sequenzen parallel
