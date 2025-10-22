@@ -1001,6 +1001,73 @@ fig.add_trace(go.Scatter(
     legendgroup="Labels", visible="legendonly", hoverinfo="skip", showlegend=False
 ))
 
+# Polygons
+if show_polygons:
+            legend_shown = {"wrong": False, "correct": False, "neutral": False}
+
+
+            Given_cart = [bary_to_cart(pt) for pt in Given]
+            if len(Given_cart) >= 3:
+                fig.add_trace(go.Scatter(
+                    x=[p[0] for p in Given_cart] + [Given_cart[0][0]],
+                    y=[p[1] for p in Given_cart] + [Given_cart[0][1]],
+                    mode="lines",
+                    line=dict(color="blue", width=2, dash="dot"),
+                    fill="toself",  
+                    fillcolor="rgba(0, 255, 255, 0.3)",
+                    name="Given Polygon",
+                    legendgroup="given",
+                    showlegend=False,
+                    hoverinfo="skip"
+                ))
+
+            for nodes_iter, kind in zip(nodes, poly_kind):
+                if len(nodes_iter) < 3:
+                    continue
+            
+                if kind == "wrong":
+                    color, group = "rgb(180, 0, 0)", "wrong"
+                elif kind == "correct":
+                    color, group = "green", "correct"
+                    nodes_cor.append(nodes_iter)
+                else:
+                    color, group = "gray", "neutral"
+                   
+                if not use_color:
+                    color = "rgb(0,120,150)"
+
+                
+            # Polygon traces are part of the group but do NOT appear in the legend
+                if use_color:
+                    if show_wrong:
+                        fig.add_trace(go.Scatter(
+                            x=[p[0] for p in nodes_iter] + [nodes_iter[0][0]],
+                            y=[p[1] for p in nodes_iter] + [nodes_iter[0][1]],
+                            mode="lines",
+                            line=dict(color=color, width=2),
+                            name="",  
+                            legendgroup=group,  
+                            showlegend=False,   
+                            hoverinfo="skip"
+                        ))
+                    
+                    else:
+                        for nodes_c in nodes_cor:
+                            fig.add_trace(go.Scatter(
+                                x=[p[0] for p in nodes_c] + [nodes_c[0][0]],
+                                y=[p[1] for p in nodes_c] + [nodes_c[0][1]],
+                                mode="lines",
+                                line=dict(color=color, width=2),
+                                fill="toself",  
+                                fillcolor="rgba(0, 255, 255, 0.3)",
+                                name="",  
+                                legendgroup=group,  
+                                showlegend=False,   
+                                hoverinfo="skip"
+                            ))
+
+
+
 # Labels at simplex corners
 fig.add_trace(go.Scatter(x=[BL[0]], y=[BL[1]-0.02],
                         mode="text", text="(0,0,1)",
