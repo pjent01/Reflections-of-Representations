@@ -988,7 +988,7 @@ fig.add_trace(go.Scatter(
     y=[bary_to_cart(pt)[1] for pt in Given],
     mode="markers",
     marker=dict(color="blue", size=6),
-    name="Given Nodes", legendgroup="given", showlegend=True,
+    name="Given Nodes", legendgroup="given", showlegend=False,
     text=[f"({a}, {b}, {c})" for (a,b,c) in Given],
     hoverinfo="text"
 ))
@@ -1028,7 +1028,7 @@ if show_polygons:
                 if kind == "wrong":
                     color, group = "rgb(180, 0, 0)", "wrong"
                 elif kind == "correct":
-                    color, group = "rgba(0, 255, 255)", "correct"
+                    color, group = "rgb(0, 255, 255)", "correct"
                     nodes_cor.append(nodes_iter)
                 else:
                     color, group = "gray", "neutral"
@@ -1057,7 +1057,7 @@ if show_polygons:
                                 x=[p[0] for p in nodes_c] + [nodes_c[0][0]],
                                 y=[p[1] for p in nodes_c] + [nodes_c[0][1]],
                                 mode="lines",
-                                line=dict(color="rgba(0, 255, 255)", width=1),
+                                line=dict(color="rgb(0, 255, 255)", width=1),
                                 fill="toself",  
                                 fillcolor="rgb(0, 255, 255)",
                                 opacity=0.3,
