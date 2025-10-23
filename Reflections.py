@@ -960,14 +960,14 @@ if use_color and show_wrong:
         textfont=dict(size=label_size),
         legendgroup="Labels", visible="legendonly", hoverinfo="skip"
     ))
-correct_color="rgba(0, 255, 255)"
+
 # Correct nodes (all sequences)
 if use_color:
     fig.add_trace(go.Scatter(
         x=[bary_to_cart(renormalize(pt))[0] for node in all_correct_nodes for pt in node],
         y=[bary_to_cart(renormalize(pt))[1] for node in all_correct_nodes for pt in node],
         mode="markers",
-        marker=dict(color=correct_color, size=3),
+        marker=dict(color="rgba(0, 255, 255)", size=3),
         name="Correct Quiver", legendgroup="correct", showlegend=True,
         text=[f"({a}, {b}, {c})" for node in all_correct_nodes for (a,b,c) in node],
         hoverinfo="text"
@@ -1028,7 +1028,7 @@ if show_polygons:
                 if kind == "wrong":
                     color, group = "rgb(180, 0, 0)", "wrong"
                 elif kind == "correct":
-                    color, group = correct_color, "correct"
+                    color, group = "rgba(0, 255, 255)", "correct"
                     nodes_cor.append(nodes_iter)
                 else:
                     color, group = "gray", "neutral"
@@ -1057,9 +1057,9 @@ if show_polygons:
                                 x=[p[0] for p in nodes_c] + [nodes_c[0][0]],
                                 y=[p[1] for p in nodes_c] + [nodes_c[0][1]],
                                 mode="lines",
-                                line=dict(color=correct_color, width=1),
+                                line=dict(color="rgba(0, 255, 255)", width=1),
                                 fill="toself",  
-                                fillcolor=correct_color,
+                                fillcolor="rgba(0, 255, 255)",
                                 opacity=0.3,
                                 name="",  
                                 legendgroup=group,  
