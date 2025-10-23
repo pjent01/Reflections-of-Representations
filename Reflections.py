@@ -1060,7 +1060,7 @@ if show_polygons:
                                 line=dict(color=correct_color, width=1),
                                 fill="toself",  
                                 fillcolor=correct_color,
-                                opacity="0.3",
+                                opacity=0.3,
                                 name="",  
                                 legendgroup=group,  
                                 showlegend=False,   
