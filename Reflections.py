@@ -1059,7 +1059,7 @@ if show_polygons:
                                 mode="lines",
                                 line=dict(color="rgba(0, 255, 255)", width=1),
                                 fill="toself",  
-                                fillcolor="rgba(0, 255, 255)",
+                                fillcolor="rgb(0, 255, 255)",
                                 opacity=0.3,
                                 name="",  
                                 legendgroup=group,  
