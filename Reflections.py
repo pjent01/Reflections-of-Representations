@@ -250,7 +250,7 @@ def matching_steps(sequence: str) -> list[int]:
 
 
 
-def plot_line_steps(fig, sequence, line_pts, k=None, color="rgba(160,32,240,0.3)"):
+def plot_line_steps(fig, sequence, line_pts, k=None, color="rgb(0,255,255)"):
 
     steps = matching_steps(sequence)
 
@@ -265,7 +265,7 @@ def plot_line_steps(fig, sequence, line_pts, k=None, color="rgba(160,32,240,0.3)
             x=line_cart[:, 0],
             y=line_cart[:, 1],
             mode="lines",
-            line=dict(color=color, width=2),
+            line=dict(color=color, width=3),
             name=f"Line k={k}, step={step}",
             showlegend=False,
             hoverinfo="text",
@@ -289,7 +289,7 @@ with col1:
         use_color = st.checkbox("Color", value=True, key="color_toggle")
     with col1_2:
         if use_color:
-            show_wrong = st.checkbox("", value = True)
+            show_wrong = st.checkbox("", value =False)
     with col1_3:
         if use_color:
             st.write("\n")
@@ -311,11 +311,11 @@ with col2:
 with col3:
     checkbox4_col, checkbox5_col, checkbox6_col = st.columns([1,1,1])
     with checkbox4_col:
-        show_one_simplex = st.checkbox("Simplex for all Sequences", value=False, key="one_simplex_toggle")
+        show_one_simplex = st.checkbox("Simplex for all Sequences", value=True, key="one_simplex_toggle")
     with checkbox5_col:
-        show_refl_triangles = st.checkbox("Reflected Fundamental Domain", value=False, key="refl_triangles_toggle")
+        show_refl_triangles = st.checkbox("Reflected Fundamental Domain", value=True, key="refl_triangles_toggle")
     with checkbox6_col:
-        show_refl_lines = st.checkbox("Reflected Lines", value=False, key="refl_lines_toggle")
+        show_refl_lines = st.checkbox("Reflected Lines", value=True, key="refl_lines_toggle")
 
 # Number of Lines
 if show_lines:
@@ -650,7 +650,7 @@ for idx, (col, sequence) in enumerate(zip(cols, sequences)):
 
 
         # Lines from Simples
-        def add_line(fig, bary1, bary2, color="rgba(0,0,0,0.4)", width=2):
+        def add_line(fig, bary1, bary2, color="rgba(0,0,0,0.4)", width=1):
             p1, p2 = bary_to_cart(bary1), bary_to_cart(bary2)
             fig.add_trace(go.Scatter(
                 x=[p1[0], p2[0]],
@@ -877,7 +877,11 @@ fig.add_trace(go.Scatter(
 # Fundamental Domain (triangle)
 fig.add_trace(go.Scatter(
     x=[p[0] for p in extra_triangle_cart], y=[p[1] for p in extra_triangle_cart],
-    mode="lines", line=dict(color="black", width=2),
+    mode="lines", 
+    line=dict(color="black", width=0.4),
+                                fill="toself",  
+                                fillcolor="rgb(0, 255, 255)",
+                                opacity=1,
     name="Triangle", showlegend=False, hoverinfo="skip"
 ))
 
@@ -890,7 +894,7 @@ if show_refl_triangles == True:
 
         for step, tri in special_tris:
             # give each sequence its own color
-            color = f"rgba(0,150,200, 0.3)"
+            color = f"rgb(0,255,255)"
             add_triangle(fig, tri, color=color)
 
             # draw corner nodes
@@ -899,7 +903,7 @@ if show_refl_triangles == True:
                 x=[p[0] for p in cart],
                 y=[p[1] for p in cart],
                 mode="markers",
-                marker=dict(size=6, color=f"rgba(0,150,200, 0.3)"),
+                marker=dict(size=1, color=f"rgb(0,255,255)"),
                 text=[f"{pt}" for pt in tri],
                 textposition="top center",
                 name=f"{seq} step {step}",
