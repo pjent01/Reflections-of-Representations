@@ -11,7 +11,7 @@ st.title("Simplex Diagram with Reflections")
 # --------------------
 dimvecs_str = st.text_area(
     "Enter dimension vectors (space-separated)",
-    "0 1 0\n0 2 1\n1 2 1\n1 2 0", height=145
+    "", height=145
 )
 
 if dimvecs_str.strip(): 
@@ -30,7 +30,7 @@ Given_base = [tuple(pt) for pt in DimVecs_base]
 
 label_size = 14
 # mehrere Sequenzen
-sequences_str = st.text_area("Enter sequences of reflections", "31321321321\n321321321321", height=145)
+sequences_str = st.text_area("Enter sequences of reflections", "123123\n13123123\n321321\n31321321", height=145)
 sequences = [seq.strip() for seq in sequences_str.split() if seq.strip()]
 
 n = st.number_input("Number of iterations of the sequences", min_value=0, value=1, step=1)
