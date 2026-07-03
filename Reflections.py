@@ -285,11 +285,11 @@ def matching_steps(sequence: str) -> list[int]:
     """
     steps = []
 
-    # Check start
+    # Check for the presence of "13" or "31" in the beginning of the sequence and record the corresponding step index (2).
     if sequence.startswith("13") or sequence.startswith("31"):
         steps.append(2)
 
-    # Check all 3-length windows
+    # Check for the presence of specific substrings in the sequence starting from index 2 and record the corresponding step indices (i+1).
     for i in range(2, len(sequence)):
         window = sequence[i-2:i+1]
         if window in {"123","321","121","323"}:
@@ -435,40 +435,16 @@ def _compute_conic_points_sample(n_samples: int, keep_in_simplex: bool, tol: flo
     return pts
 
 
-def add_triangle(fig: go.Figure, bary_points: list, color: str="rgba(50,150,250,0.4)", line_color: str="rgba(0,150,200, 0.3)"):
-    """ Add a triangle to the given Plotly figure based on the provided barycentric points. The function converts the barycentric coordinates to Cartesian coordinates and adds a filled polygon representing the triangle to the figure.
-
-    Args:
-        fig (go.Figure): A Plotly figure object to which the triangle will be added.
-        bary_points (list): A list of points in barycentric coordinates that define the vertices of the triangle.
-        color (str, optional): The fill color of the triangle in RGBA format. Defaults to "rgba(50,150,250,0.4)".
-        line_color (str, optional): The color of the triangle's border in RGBA format. Defaults to "rgba(0,150,200, 0.3)".
+def add_line(fig: go.Figure, bary1: tuple, bary2: tuple, color: str ="rgba(0,0,0,0.4)", width: float = 1.0) -> None:
+    """ Add a line segment between two points in barycentric coordinates to a Plotly figure.
+    
+    Args: 
+        fig (go.Figure): A Plotly figure object to which the line segment will be added.
+        bary1 (tuple): The first point in barycentric coordinates (A, B, C).
+        bary2 (tuple): The second point in barycentric coordinates (A, B, C).
+        color (str): The color of the line segment in RGBA format. Defaults to "rgba(0,0,0,0.4)".
+        width (float): The width of the line segment. Defaults to 1.0.
     """
-    cart_points = [bary_to_cart(renormalize(pt)) for pt in bary_points]
-    cart_points.append(cart_points[0])
-    fig.add_trace(go.Scatter(
-        x=[p[0] for p in cart_points],
-        y=[p[1] for p in cart_points],
-        mode="lines",
-        fill="toself",
-        fillcolor=color,
-        line=dict(color=line_color, width=2),
-        showlegend=False,
-        hoverinfo="skip"
-    ))
-
-
-def apply_sequence_to_triangle(triangle, sequence):
-    triangles = [triangle]
-    current = triangle[:]
-    for digit in sequence:
-        action = digit_actions[digit]
-        current = action(current)
-        triangles.append(current)
-    return triangles
-
-
-def add_line(fig, bary1, bary2, color="rgba(0,0,0,0.4)", width=1):
     p1, p2 = bary_to_cart(bary1), bary_to_cart(bary2)
     fig.add_trace(go.Scatter(
         x=[p1[0], p2[0]],
@@ -480,7 +456,15 @@ def add_line(fig, bary1, bary2, color="rgba(0,0,0,0.4)", width=1):
     ))
 
 
-def step_size(k):
+def step_size(k: int) -> int:
+    """ Determine the step size for plotting based on the value of k. The function returns different step sizes for different ranges of k to control the density of plotted lines.
+    
+    Args:
+        k (int): The value of k for which to determine the step size.
+    
+    Returns:
+        int: The step size for plotting.
+    """
     if k < 20:
         return 1
     elif k < 40:
@@ -494,22 +478,27 @@ def step_size(k):
 
 
 def main():
+    """ Main function to run the Streamlit application for visualizing the simplex diagram with reflections. This function sets up the user interface, handles user inputs, and generates the visualizations based on the specified sequences of reflections and other parameters."""
+    
     st.set_page_config(layout="wide")
     st.title("Simplex Diagram with Reflections")
     
-    # --------------------
-    # Inputs
-    # --------------------
+    # ============================================
+    # Layout
+    # ============================================
+
+    # --- Dimension Vectors Input ---
+    # Each line is one vector of three space-separated barycentric coordinates (A, B, C).
     dimvecs_str = st.text_area(
         "Enter dimension vectors (space-separated)",
-        "0 1 0\n1 2 0\n1 2 1\n0 2 1", height=145
+        "1 2 1\n0 2 1\n0 1 0\n148 236 103", height=135
     )
     
     if dimvecs_str.strip(): 
         DimVecs_base = [
             [
-                int(val) if float(val).is_integer() else float(val)
-                for val in line.split()
+                int(val) if float(val).is_integer() else float(val) 
+                for val in line.split() 
             ]
             for line in dimvecs_str.strip().splitlines()
         ]
@@ -518,22 +507,18 @@ def main():
     
     Given_base = [tuple(pt) for pt in DimVecs_base]
     
-    
-    label_size = 14
-    # sequence input
-    sequences_str = st.text_area("Enter sequences of reflections", "123123\n13123123", height=145)
+    # --- Sequences Input ---
+    # Each line represents a sequence of digits ('1', '2', '3'). Each digit represents a reflection.
+    sequences_str = st.text_area("Enter sequences of reflections", "123123\n13123123", height=75)
     sequences = [seq.strip() for seq in sequences_str.split() if seq.strip()]
-    n = st.number_input("Number of iterations of the sequences", min_value=0, value=1, step=1)
-    n = int(n) + 1
+    
+    n = 1  # number of iterations of the reflection sequences. Used in line 593.
+    
+    label_size = 14  # size of the labels in the plotly figure
     
     
-    
-    
-    
-    # --------------------
-    # Layout
-    # --------------------
-    
+    # --- Display controls ---
+    # 
     st.caption("Display controls")
     
     color_col, wrong_col = st.columns([1.2, 2.0])
@@ -543,17 +528,18 @@ def main():
         if use_color:
             show_wrong = st.checkbox("Show different orientation", value=False, key="show_wrong_toggle")
     
-    viz_col1, viz_col2, viz_col3, viz_col4, viz_col5, viz_col6 = st.columns([1.1, 1.1, 1.0, 1.6, 1.8, 1.5])
-    with viz_col1:
-        use_arrows = st.checkbox("Quivers", value=True, key="arrows_toggle")
-    with viz_col2:
-        show_polygons = st.checkbox("Polygons", value=True, key="polygons_toggle")
-    with viz_col3:
-        show_lines = st.checkbox("Lines", value=True, key="lines_toggle")
-    with viz_col4:
-        show_one_simplex = st.checkbox("Simplex for all Sequences", value=True, key="one_simplex_toggle")
-    with viz_col5:
-        show_refl_lines = st.checkbox("Reflected Lines", value=True, key="refl_lines_toggle")
+    with st.expander("Visualization Options", expanded=False):
+        viz_col1, viz_col2, viz_col3, viz_col4, viz_col5, viz_col6 = st.columns([1.1, 1.1, 1.0, 1.6, 1.8, 1.5])
+        with viz_col1:
+            use_arrows = st.toggle("Quivers", value=True, key="arrows_toggle")
+        with viz_col2:
+            show_polygons = st.checkbox("Polygons", value=True, key="polygons_toggle")
+        with viz_col3:
+            show_lines = st.checkbox("Lines", value=True, key="lines_toggle")
+        with viz_col4:
+            show_one_simplex = st.checkbox("Simplex for all Sequences", value=True, key="one_simplex_toggle")
+        with viz_col5:
+            show_refl_lines = st.checkbox("Reflected Lines", value=True, key="refl_lines_toggle")
     
     # Number of Lines
     # Keep a default so the combined chart can still render even when the
