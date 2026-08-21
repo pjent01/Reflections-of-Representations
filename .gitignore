@@ -1,6 +1,3 @@
 .vscode/
 __pycache__/
 *.py[cod]
-
-REFACTOR_TODO.md
-code_structure_explanation.tex
