@@ -3,87 +3,33 @@ from dataclasses import dataclass
 import plotting_utils as pu
 
 @dataclass
-class VisualizationOptions:
-    use_color: bool
-    show_polygons: bool
-    show_lines: bool
-    line_limit: int
-    show_reflected_lines: bool
-    use_arrows: bool
+class UserInputs:
+    DISPLAY_OPTIONS: str
+    one_simplex_toggled: bool
+    color_t: bool
+    wrong_t: bool
+    polygons_t: bool
+    lines_t: bool
+    line_limit_input: int
+    reflected_lines_t: bool
+    quiver_t: bool
 
 
 def parse_dimension_vectors(given_vectors_str: str) -> list[list[int | float]]:
     """Parse the dimension vector textarea input into vectors, split by line breaks. Integer-valued entries are converted to int."""
-    if not given_vectors_str.strip():
-        return []
     return [
-        [
-            int(val) if float(val).is_integer() else float(val)
-            for val in line.split()
-        ]
+        [int(val) if float(val).is_integer() else float(val) for val in line.split()]
         for line in given_vectors_str.strip().splitlines()
+        if given_vectors_str.strip()
     ]
-
 
 def parse_sequences(sequences_str: str) -> list[str]:
     """Parse the sequences textarea input into sequence strings, split by line breaks or spaces."""
     return [seq.strip() for seq in sequences_str.split() if seq.strip()]
 
-
-def get_visualization_options() -> VisualizationOptions:
-    """Render visualization option controls and return their current values.
-
-    Default values:
-        - use_color=True 
-        - show_polygons=False
-        - show_lines=True,
-        - line_limit=20 when lines are enabled (otherwise 0)
-        - show_reflected_lines=False
-        - use_arrows=True
-    """
-    with st.expander("Visualization Options", expanded=False):
-        use_color = st.checkbox("Color", value=True, key="color_toggle")
-        show_polygons = st.checkbox("Polygons", value=False, key="polygons_toggle")
-        show_lines = st.checkbox("Lines", value=True, key="lines_toggle")
-        line_limit = 0
-        show_reflected_lines = False
-        if show_lines:
-            line_limit = st.number_input("Number of Lines", min_value=0, value=20, step=1)
-            show_reflected_lines = st.checkbox("Reflected Lines", value=False, key="refl_lines_toggle")
-    if "arrows_toggle" not in st.session_state:
-        st.session_state.arrows_toggle = True
-    use_arrows = st.session_state.arrows_toggle
-    return VisualizationOptions(
-        use_color=use_color,
-        show_polygons=show_polygons,
-        show_lines=show_lines,
-        line_limit=line_limit,
-        show_reflected_lines=show_reflected_lines,
-        use_arrows=use_arrows,
-    )
-
-
-def get_exceptional_sequence_options() -> tuple[int, int, bool]:
-    """Render exceptional sequence controls and return their current values.
-
-    Returns a tuple in this order:
-    - exceptional_count (default: 5)
-    - exceptional_depth (default: 2)
-    - highlight_exceptional (default: False)
-    """
-    with st.expander("Exceptional Sequences", expanded=False):
-        exceptional_count = st.number_input("Number of Exceptional Sequences", min_value=0, value=5, step=1)
-        exceptional_depth = st.number_input("Depth of Exceptional Sequences", min_value=0, value=2, step=1)
-        highlight_exceptional = st.toggle("Highlight Exceptional Sequences", value=False, key="highlight_exceptional_toggle")
-    return exceptional_count, exceptional_depth, highlight_exceptional
-
-
-def should_render_output_line(line_color: str, show_wrong: bool) -> bool:
-    """Return whether output lines with this color should be rendered."""
-    return line_color != "rgb(180, 0, 0)" or show_wrong
-
-
-def format_output_html(text: str, color: str, *, bold: bool = False, indent_level: int = 0) -> str:
+def format_output_html(
+    text: str, color: str, *, bold: bool = False, indent_level: int = 0
+) -> str:
     """Format one output row as HTML while preserving current visual spacing."""
     indent_unit = "&nbsp;&nbsp;&nbsp;&nbsp;&emsp;"
     body = f"{indent_unit * indent_level}{text}"
@@ -91,53 +37,12 @@ def format_output_html(text: str, color: str, *, bold: bool = False, indent_leve
         body = f"<b>{body}</b>"
     return f"<span style='color:{color}'>{body}</span>"
 
-
-def render_sequence_meta_block(
-    *,
-    sequence_index: int,
-    use_color: bool,
-    show_wrong: bool,
-) -> None:
-    """Render per-sequence legend/toggle row or spacing placeholders for alignment."""
-    kronecker_and_toggle_extra_spacer_rem = 5.1
-    different_orientation_extra_spacer_rem = 2.6
-    toggle_extra_spacer_rem = 2.5
-    if use_color and sequence_index == 0:
-        st.markdown(
-            "<span style='color:green; font-weight:600'>Kronecker Chain</span>",
-            unsafe_allow_html=True,
-        )
-        if show_wrong:
-            st.markdown(
-                "<span style='color:rgb(180, 0, 0); font-weight:600'>Different Orientation</span>",
-                unsafe_allow_html=True,
-            )
-
-    if sequence_index == 0:
-        st.toggle("Show Quiver Orientation", key="arrows_toggle")
-    elif use_color:
-        st.markdown(
-            f"<div style='height: {kronecker_and_toggle_extra_spacer_rem}rem;'></div>",
-            unsafe_allow_html=True,
-        )
-        if show_wrong:
-            st.markdown(
-                f"<div style='height: {different_orientation_extra_spacer_rem}rem;'></div>",
-                unsafe_allow_html=True,
-            )
-    else:
-        st.markdown(
-            f"<div style='height: {toggle_extra_spacer_rem}rem;'></div>",
-            unsafe_allow_html=True,
-        )
-
-
 def arrow_symbol(mode: str = "updown"):
-    """ Return a LaTeX string representing an arrow symbol based on the specified mode to depict the orientation of the underlying quiver.
+    """Return a LaTeX string representing an arrow symbol based on the specified mode to depict the orientation of the underlying quiver.
 
-    Args: 
+    Args:
         mode (str): The mode specifying the arrow orientation. It can be "up", "down", "updown", or "downup".
-    
+
     Returns:
         str: A LaTeX string representing the arrow symbol corresponding to the specified mode.
     """
@@ -150,3 +55,85 @@ def arrow_symbol(mode: str = "updown"):
     elif mode == "downup":
         return "$\\begin{matrix} \\rightarrow\\ \\leftarrow \\\\[-7pt] \\rightarrow\\ \\leftarrow\\end{matrix}$"
 
+
+# User inputs
+def vector_inputs() -> list[list[int | float]]:
+    vectors_input = st.text_area(
+        "Input three-dimensional dimension vectors. Dimensions are separated by spaces and vectors by line breaks.",
+        "1 2 1\n0 1 0\n1 2 0\n0 2 1",
+        height=135,
+    )
+    vectors_list = parse_dimension_vectors(vectors_input)
+    return vectors_list
+
+def sequence_inputs() -> list[str]:
+    sequences_input = st.text_area(
+        "Input sequences containing the digits 1, 2 or 3. Sequences are separated by space or line break.",
+        "123123123\n321321321",
+        height=50,
+    )
+    sequences_list = parse_sequences(sequences_input)
+    return sequences_list
+
+# UI controls
+def display_user_inputs():
+    DISPLAY_OPTIONS = st.caption("Display options")
+    one_simplex_toggled = st.toggle(
+        "One simplex for all sequences",
+        value=False,
+        key="one_simplex_toggled",
+    )
+
+    with st.expander("Visualization options", expanded=False, type="compact"):
+        color_t = st.toggle("Color", value=True, key="color_t_toggle")
+        wrong_t = st.toggle(
+            "Show dimension vectors of differently oriented quivers (red, if Color is active)",
+            value=True, key="wrong_t_toggle"
+        )
+        polygons_t = st.toggle("Connect vectors for each step", value=False, key="polygons_t_toggle")
+        lines_t = st.toggle("Show lines between orthogonal vectors", value=True, key="lines_t_toggle")
+        line_limit_input = 20
+        reflected_lines_t = False
+        if lines_t:
+            line_limit_input = st.number_input(
+                "Input how many lines should be generated (large inputs decrease performance)",
+                value=20,
+                key="line_limit_input",
+            )
+            reflected_lines_t = st.toggle(
+                "Show lines reflected in each step of the sequences",
+                value=False,
+                key="reflected_lines_t_toggle",
+            )
+        quiver_t = st.toggle(
+            "Show Quiver Orientation",
+            value=True,
+            key="quiver_t",
+        )
+    return UserInputs(
+        DISPLAY_OPTIONS,
+        one_simplex_toggled,
+        color_t,
+        wrong_t,
+        polygons_t,
+        lines_t,
+        line_limit_input,
+        reflected_lines_t,
+        quiver_t
+    )
+
+# Exceptional sequences options
+def exceptional_sequence_options():
+    with st.expander("Exceptional sequences options", expanded=False, type="compact"):
+        excep_number_input = st.number_input(
+            "Input how many different exceptional sequences should be generated",
+            value=5,
+        )
+        excep_depth_input = st.number_input(
+            "Input how many exceptional vectors should be generated per exceptional sequence",
+            value=2,
+        )
+        excep_highlight_t = st.toggle(
+            "Highlight exceptional vectors (cyan)", value=False
+        )
+    return excep_number_input, excep_depth_input, excep_highlight_t
