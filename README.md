@@ -1,42 +1,69 @@
-This project was originally conceived as a tool to better understand certain aspects of the representation theory of quivers. 
-As I created this program to fill my needs, it may lack some fundamental aspects of quiver theory. The current visualization 
-only works for a certain quiver, the so-called Kronecker chain of length 2. This is a quiver with three vertices, two arrows 
-from the first to the second vertex and two arrows from the second to the third. 
+# Reflections of Representations
 
-# Installation
-## Method 1 (online)
+In the theory of quiver representations, a big hurdle is visualizing problems in this field. Although the subject is connected to areas such as algebraic geometry, quiver representations often remain more abstract than many other mathematical fields. One way to make representations of smaller quivers more concrete is to display their dimension vectors in a barycentric simplex.
+
+This project provides an interactive simplex visualization for one specific quiver: the Kronecker chain of length 2. This quiver has three vertices, with two arrows from the first vertex to the second and two arrows from the second to the third. The application lets users enter dimension vectors and reflection sequences, then inspect the resulting vectors, quiver orientations, and related geometric structures.
+
+These visualizations are practical only for small quivers, since the dimension of the simplex is one less than the number of vertices. Studying three-vertex quivers in detail is likely to provide insights that can be generalized to larger quivers.
+
+## Features
+
+The main feature of this project is an interactive Plotly diagram of a barycentric simplex. It includes:
+
+- Reflected vectors of user-provided dimension vectors according to user-provided reflection sequences
+- Polygons connecting the vectors created at each step of a reflection sequence
+- Distinction between dimension vectors over the Kronecker chain and vectors over differently oriented quivers
+- Lines between orthogonal pairs
+- Exceptional dimension vectors associated with orthogonal pairs
+- The fundamental domain and the ellipse defined by the quadratic form
+- Reflections of the lines according to the supplied sequences
+- The option to display each sequence in a separate simplex or all sequences in one simplex
+
+Below the diagram, the application displays the vectors created at each step of the user-provided sequences, together with the current orientation of the quiver.
+
+## Installation
+### Method 1 (online)
 The online version is available at https://reflections.streamlit.app.
-To run this program locally, follow Method 2.
-## Method 2 (local)
-Clone this repository using 
+
+### Method 2 (local)
+Requires Python 3.12 or newer.  
+Clone this repository and install the requirements in a virtual environment:
+#### Linux / MacOS
+```bash
+git clone https://github.com/pjent01/Reflections-of-Representations.git
+cd Reflections-of-Representations
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
-git clone https://github.com/pjent01/Reflections-of-Representations 
+#### Windows
+```cmd
+git clone https://github.com/pjent01/Reflections-of-Representations.git
+cd Reflections-of-Representations
+python -m venv .venv
+.venv\Scripts\activate
+python -m pip install -r requirements.txt
 ```
-Then install the necessary
-requirements with 
-```
-pip install -r requirements.txt
-```
-Afterwards, use 
-```
+
+Then start the application with:
+```bash
 streamlit run main.py
 ```
-within the repository.
 
-# Usage
-Input a dimension vector with three coordinates for a representation of the Kronecker Chain of length 2. Each component of a vector
-should be seperated by space and each new vector should be written in a new line. After confirming the input with `Ctrl + Enter`, the 
+## Usage
+Input a dimension vector with three coordinates for a representation of the Kronecker chain of length 2. Each component of a vector
+should be separated by space and each new vector should be written in a new line. After confirming the input with `Ctrl + Enter`, the 
 input vectors are displayed in the simplices below the controls. 
 
 In the second field, you can enter sequences of reflections. Each sequence should be written as a continuous string of numbers. Each
-new sequence should be either written in a new line or seperated by space. The sequences generate new vectors from the given ones. 
+new sequence should be either written in a new line or separated by space. The sequences generate new vectors from the given ones.
 The reflections can change the orientation of the underlying quiver. When `Color` is activated, those vectors with underlying quiver 
 the Kronecker chain of length 2 are displayed in green, while those over a quiver with different orientation are displayed in red. 
 
 There are two modes for this program. 
 Normally, there is one simplex per sequence, in which all vectors generated by this sequence are displayed. However, when
 `One simplex for all sequences` is active, only a single simplex is generated. It contains all vectors generated by any of the sequences.
-They are not seperated by sequence.
+They are not separated by sequence.
 
 ### Visualization Options
 #### Color
