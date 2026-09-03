@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 import plotly.graph_objects as go
 from dataclasses import dataclass
+
 import math_core as mc
 
 
@@ -130,7 +131,7 @@ def compute_figure_height(show_one_simplex: bool, sequence_count: int) -> int:
 
 def build_simplex_figure(
     given_vectors: list[tuple[float, float, float]],
-    reflected_line_sequences: list[str],
+    sequences: list[str],
     node_records: list[tuple[np.ndarray, tuple[float, float, float]]],
     wrong_nodes: list[list[tuple[float, float, float]]],
     correct_nodes: list[list[tuple[float, float, float]]],
@@ -183,9 +184,9 @@ def build_simplex_figure(
         ))
 
     if cfg.show_lines:
-        if cfg.show_reflected_lines and reflected_line_sequences:
+        if cfg.show_reflected_lines and sequences:
             all_lines = mc.base_lines(cfg.line_limit)
-            for sequence in reflected_line_sequences:
+            for sequence in sequences:
                 for p1, p2, k in all_lines:
                     plot_reflected_line_steps(fig, sequence, [p1, p2], k=k)
 

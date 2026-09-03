@@ -22,7 +22,7 @@ def main():
         settings.wrong_t,
         settings.polygons_t,
         settings.lines_t,
-        800,
+        pu.compute_figure_height(settings.one_simplex_toggled, len(sequences_list)),
         settings.line_limit_input,
         settings.reflected_lines_t,
         excep_number_input,
@@ -63,7 +63,7 @@ def main():
                 st.markdown("#### " + f"Sequence: {sequence}")
                 simplex_indiv = pu.build_simplex_figure(
                     vectors_list,
-                    sequence_result.output_lines,
+                    [sequence],
                     sequence_result.node_records,
                     sequence_result.wrong_nodes,
                     sequence_result.correct_nodes,
@@ -85,7 +85,7 @@ def main():
         st.markdown("### " + "Simplex for all sequences")
         simplex_all = pu.build_simplex_figure(
             vectors_list,
-            output_lines_all,
+            sequences_list,
             node_records_all,
             wrong_nodes_all,
             correct_nodes_all,
