@@ -18,7 +18,7 @@ def process_sequence(
     *,
     use_arrows: bool,
     use_color: bool,
-    show_wrong: bool,
+    wrong_t: bool,
 ) -> SequenceProcessResult:
     """Process one reflection sequence and return rendering/output artifacts."""
     given_vectors_current = [v[:] for v in given_vectors_initial]
@@ -26,7 +26,7 @@ def process_sequence(
     digits = []
     nodes = []
     node_records = []
-    output_lines = []
+    output_text = []
 
     q_state = (1, 1)
     correct_steps_by_state = {
@@ -124,10 +124,9 @@ def process_sequence(
             arrow = ui.arrow_symbol("up") if use_arrows else ""
             line_color = "green" if use_color else "black"
 
-        should_show_reflection_line = ui.should_render_output_line(line_color, show_wrong)
         reflection_text = f"{arrow}&emsp;Reflection: {' '.join(digits)}"
-        if should_show_reflection_line:
-            output_lines.append(
+        if wrong_t or poly_kind[-1] == "correct":
+            output_text.append(
                 ui.format_output_html(
                     reflection_text,
                     line_color,
@@ -139,8 +138,8 @@ def process_sequence(
             cart = mc.bary_to_cart((A, B, C))
             node_records.append((cart, (A, B, C)))
             point_text = f"P{point_idx}: ({A}, {B}, {C})"
-            if should_show_reflection_line:
-                output_lines.append(
+            if wrong_t or poly_kind[-1] == "correct":
+                output_text.append(
                     ui.format_output_html(
                         point_text,
                         line_color,
@@ -158,5 +157,5 @@ def process_sequence(
         wrong_nodes=wrong_nodes,
         correct_nodes=correct_nodes,
         polygon_steps=polygon_steps,
-        output_lines=output_lines,
+        output_lines=output_text,
     )
