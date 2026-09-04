@@ -47,7 +47,7 @@ python -m pip install -r requirements.txt
 
 Then start the application with:
 ```bash
-streamlit run main.py
+python -m streamlit run main.py
 ```
 
 ## Usage
@@ -112,5 +112,13 @@ Below the diagrams, there is a text output for the vectors generated after each 
 The blocks for the dimension vectors over the Kronecker chain are displayed in green and those over a quiver of different orientation are displayed
 in red.
 
-
-
+## Mathematical Background
+A quiver is made up of vertices which are connected by arrows. Another term for the same construction would be "directed graph". This project is concerned with the so-called Kronecker chain of length 2:
+<picture>
+  <source
+    media="(prefers-color-scheme: dark)"
+    srcset="./docs/kronecker-chain-darkmode.svg">
+  <img
+    src="./docs/kronecker-chain-lightmode.svg"
+    alt="Kronecker chain of length 2">
+</picture>

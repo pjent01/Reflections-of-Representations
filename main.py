@@ -7,7 +7,7 @@ import sequence_processing as sp
 def main():
 
     st.set_page_config(layout="wide")
-    st.title("Visualization for Representations of Quivers and Their Reflections")
+    st.title("Visualization for Representations of Quivers")
 
     vectors_list = ui.vector_inputs()
     sequences_list = ui.sequence_inputs()
