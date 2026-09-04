@@ -115,10 +115,7 @@ in red.
 ## Mathematical Background
 A quiver is made up of vertices which are connected by arrows. Another term for the same construction would be "directed graph". This project is concerned with the so-called Kronecker chain of length 2:
 <picture>
-  <source
-    media="(prefers-color-scheme: dark)"
-    srcset="./docs/kronecker-chain-darkmode.svg">
-  <img
-    src="./docs/kronecker-chain-lightmode.svg"
-    alt="Kronecker chain of length 2">
+  <source media="(prefers-color-scheme: dark)" srcset="./docs/kronecker-chain-darkmode.svg">
+  <source media="(prefers-color-scheme: light)" srcset="./docs/kronecker-chain-lightmode.svg">
+  <img src="./docs/kronecker-chain-lightmode.svg" alt="Kronecker chain of length 2">
 </picture>
