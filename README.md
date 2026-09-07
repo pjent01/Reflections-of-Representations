@@ -50,7 +50,7 @@ Then start the application with:
 python -m streamlit run main.py
 ```
 
-## Usage
+## Using the Interface
 Input a dimension vector with three coordinates for a representation of the Kronecker chain of length 2. Each component of a vector
 should be separated by space and each new vector should be written in a new line. After confirming the input with `Ctrl + Enter`, the 
 input vectors are displayed in the simplices below the controls. 
@@ -113,9 +113,23 @@ The blocks for the dimension vectors over the Kronecker chain are displayed in g
 in red.
 
 ## Mathematical Background
-A quiver is made up of vertices which are connected by arrows. Another term for the same construction would be "directed graph". This project is concerned with the so-called Kronecker chain of length 2:
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./docs/kronecker-chain-darkmode.svg">
-  <source media="(prefers-color-scheme: light)" srcset="./docs/kronecker-chain-lightmode.svg">
-  <img src="./docs/kronecker-chain-lightmode.svg" alt="Kronecker chain of length 2">
-</picture>
+A <b>quiver</b> is a directed graph, consisting of a set of vertices and a set of arrows between them. This project is concerned with the so-called Kronecker chain of length 2:
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./docs/kronecker-chain-darkmode.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./docs/kronecker-chain-lightmode.svg">
+    <img src="./docs/kronecker-chain-lightmode.svg" alt="Kronecker chain of length 2"
+    width="200">
+  </picture>
+</p>
+For a <b>representation</b> of such a quiver, one assigns a vector space to each vertex and a linear map to each arrow. The <b>dimension vector</b> of a representation is the tuple of the dimensions of the vector spaces assigned to the vertices. In this case, the dimension vector is a triple of non-negative integers.
+
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./docs/simplex_123_darkmode.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./docs/simplex_123_lightmode.svg">
+    <img src="./docs/simplex_123_darkmode.svg" alt="Simplex with dimension vector (1,2,3)"
+    width="300">
+  </picture>
+</p>
