@@ -1,47 +1,74 @@
-This project was originally conceived as a tool to better understand certain aspects of the representation theory of quivers. 
-As I created this program to fill my needs, it may lack some fundamental aspects of quiver theory. The current visualization 
-only works for a certain quiver, the so-called Kronecker chain of length 2. This is a quiver with three vertices, two arrows 
-from the first to the second vertex and two arrows from the second to the third. 
+# Reflections of Representations
 
-# Installation
-## Method 1 (online)
+In the theory of quiver representations, a big hurdle is visualizing problems in this field. Although the subject is connected to areas such as algebraic geometry, quiver representations often remain more abstract than many other mathematical fields. One way to make representations of smaller quivers more concrete is to display their dimension vectors in a barycentric simplex.
+
+This project provides an interactive simplex visualization for one specific quiver: the Kronecker chain of length 2. This quiver has three vertices, with two arrows from the first vertex to the second and two arrows from the second to the third. The application lets users enter dimension vectors and reflection sequences, then inspect the resulting vectors, quiver orientations, and related geometric structures.
+
+These visualizations are practical only for small quivers, since the dimension of the simplex is one less than the number of vertices. Studying three-vertex quivers in detail is likely to provide insights that can be generalized to larger quivers.
+
+## Features
+
+The main feature of this project is an interactive Plotly diagram of a barycentric simplex. It includes:
+
+- Reflected vectors of user-provided dimension vectors according to user-provided reflection sequences
+- Polygons connecting the vectors created at each step of a reflection sequence
+- Distinction between dimension vectors over the Kronecker chain and vectors over differently oriented quivers
+- Lines between orthogonal pairs
+- Exceptional dimension vectors associated with orthogonal pairs
+- The fundamental domain and the ellipse defined by the quadratic form
+- Reflections of the lines according to the supplied sequences
+- The option to display each sequence in a separate simplex or all sequences in one simplex
+
+Below the diagram, the application displays the vectors created at each step of the user-provided sequences, together with the current orientation of the quiver.
+
+## Installation
+### Method 1 (online)
 The online version is available at https://reflections.streamlit.app.
-To run this program locally, follow Method 2.
-## Method 2 (local)
-Clone this repository using 
-```
-git clone https://github.com/pjent01/Reflections-of-Representations 
-```
-Then install the necessary
-requirements with 
-```
-pip install -r requirements.txt
-```
-Afterwards, use 
-```
-streamlit run main.py
-```
-within the repository.
 
-# Usage
-Input a dimension vector with three coordinates for a representation of the Kronecker Chain of length 2. Each component of a vector
-should be seperated by space and each new vector should be written in a new line. After confirming the input with `Ctrl + Enter`, the 
+### Method 2 (local)
+Requires Python 3.12 or newer.  
+Clone this repository and install the requirements in a virtual environment:
+#### Linux / MacOS
+```bash
+git clone https://github.com/pjent01/Reflections-of-Representations.git
+cd Reflections-of-Representations
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+#### Windows
+```cmd
+git clone https://github.com/pjent01/Reflections-of-Representations.git
+cd Reflections-of-Representations
+python -m venv .venv
+.venv\Scripts\activate
+python -m pip install -r requirements.txt
+```
+
+Then start the application with:
+```bash
+python -m streamlit run main.py
+```
+
+## Using the Interface
+Input a dimension vector with three coordinates for a representation of the Kronecker chain of length 2. Each component of a vector
+should be separated by space and each new vector should be written in a new line. After confirming the input with `Ctrl + Enter`, the 
 input vectors are displayed in the simplices below the controls. 
 
-In the second field, you can enter sequences of reflections. Each sequence should be written as a continuous string of numbers. Each
-new sequence should be either written in a new line or seperated by space. The sequences generate new vectors from the given ones. 
+In the second field, you can enter sequences of reflections. Each sequence should be written as a continuous string, containing only the digits `1`, `2` and `3`. Each
+new sequence should be either written in a new line or separated by space. The sequences generate new vectors from the given ones.
 The reflections can change the orientation of the underlying quiver. When `Color` is activated, those vectors with underlying quiver 
-the Kronecker chain of length 2 are displayed in green, while those over a quiver with different orientation are displayed in red. 
+the Kronecker chain of length 2 are displayed in green, while those over a quiver with different orientation are displayed in red.
 
 There are two modes for this program. 
 Normally, there is one simplex per sequence, in which all vectors generated by this sequence are displayed. However, when
 `One simplex for all sequences` is active, only a single simplex is generated. It contains all vectors generated by any of the sequences.
-They are not seperated by sequence.
+They are not separated by sequence.
 
 ### Visualization Options
 #### Color
 When active, distinguishes vectors based on the orientation of the underlying quiver. Green for the Kronecker chain, red for a different
-orientation.
+orientation. Given vectors are displayed in blue.
 
 #### Show dimension vectors of differently oriented quivers
 When active, displays all dimension vectors, including those over a quiver of different orientation. Otherwise, only the vectors displayed
@@ -56,13 +83,14 @@ tracking which vectors are generated by the same reflections.
 Some dimension vectors form so-called orthogonal pairs. These each generate a category, which, in the case of this visualization, forms 
 a line between both vectors in the pair. This option displays these lines.
 
-Since there are infinitely many lines, it is possible to adjust how many lines should be generated. While even a large number of lines can
+Since there are infinitely many lines, it is possible to adjust how many lines should be generated. 
+While even a large number of lines can
 be displayed accurately, increasing the number of lines harms performance significantly.
 
 #### Show lines reflected in each step
-When active, show the lines that are generated by the reflection sequences within the ellipse. Within the ellipse, all lines are Schur and
-are therefore displayed in light blue. At least for my purposes, only the parts of the reflected lines that are within the ellipse were relevant. 
-For the sake of clarity, only these parts are displayed.
+When active, show the lines that are generated by the reflection sequences within the ellipse. Only those reflections that result in the underlying quiver being the Kronecker quiver generate these lines. Lines over differently oriented quivers are not displayed.
+Within the ellipse, these lines are Schur and
+are therefore displayed in cyan. At least for my purposes, only the parts of the reflected lines that are within the ellipse are relevant. For the sake of clarity, only these parts are displayed.
 
 ### Exceptional Sequences Options
 #### Input how many different exceptional sequences should be generated
@@ -85,5 +113,87 @@ Below the diagrams, there is a text output for the vectors generated after each 
 The blocks for the dimension vectors over the Kronecker chain are displayed in green and those over a quiver of different orientation are displayed
 in red.
 
+## Mathematical Background
+### Useful Basics
+A <b>quiver</b> is a directed graph, consisting of a set of vertices and a set of arrows between them. This project is concerned with the so-called Kronecker chain of length 2:
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./docs/kronecker-chain-darkmode.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./docs/kronecker-chain-lightmode.svg">
+    <img src="./docs/kronecker-chain-lightmode.svg" alt="Kronecker chain of length 2"
+    width="250">
+  </picture>
+</p>
+For a <b>representation</b> of such a quiver, one assigns a vector space to each vertex and a linear map to each arrow:
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./docs/representation_123_darkmode.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./docs/representation_123_lightmode.svg">
+    <img src="./docs/representation_123_darkmode.svg" alt="Representation for dimension vector (1,2,3)"
+    width="250">
+  </picture>
+</p>
 
+The <b>dimension vector</b> of a representation is the tuple of the dimensions of the vector spaces assigned to the vertices. In this case, the dimension vector is a triple of non-negative integers: $(1,2,3)$.
 
+We can position such a dimension vector in a simplex in relation to the three corners $(0,0,1)$, $(0,1,0)$ and $(1,0,0)$. For the visualization, the coordinates are normalized by their sum and used as barycentric coordinates. Thus, $(1,2,3)$ is represented by the weights $(1/6,2/6,3/6)$, and multiples of a vector have the same position in the simplex. The following is a visualization of the simplex diagram, where the blue dot represents the vector $(1,2,3)$:
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./docs/simplex_123_darkmode.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./docs/simplex_123_lightmode.svg">
+    <img src="./docs/simplex_123_darkmode.svg" alt="Simplex with dimension vector (1,2,3)"
+    width="300">
+  </picture>
+</p>
+
+### Additional Aspects
+In the following, we go over some of the aspects of quiver theory that can be visualized with this program.
+
+#### Ellipse
+The ellipse towards the center of the simplex comes from the so-called Euler form. Let $(a_1,b_1,c_1)$ and $(a_2,b_2,c_2)$ be two dimension vectors over the Kronecker chain. Then the Euler form is defined by the formula:
+
+$a_1 a_2 + b_1 b_2 + c_1 c_2 - 2 a_1 b_2 - 2 b_1 c_2.$
+
+For the ellipse, we consider the Euler form on one vector with itself. This gives the quadratic form:
+
+$q(a,b,c)=a^2 + b^2 + c^2-2ab - 2bc.$
+
+The vector $(a,b,c)$ lies on the ellipse, if this form is equal to 0. If it is negative, the vector is inside the ellipse and if it is positive, the vector is outside the ellipse.
+
+For the vector $(1,2,3)$, we have:
+
+$1^2 + 2^2 + 3^2 - 2\cdot 1\cdot 2 - 2\cdot 2\cdot 3 = 14 - 16 =-2$
+
+and, as we can see in the visualization above, $(1,2,3)$ is inside the ellipse, as expected.
+
+#### Schur roots
+A representation is called <em>Schur</em> if every map from the representation to itself is just multiplication by a scalar.
+The dimension vector of a Schur representation is called a <em>Schur root</em>.
+Schur roots are usually marked in cyan in our visualization. For example,
+$(1,2,3)$ is a Schur root.
+
+Intuitively, a Schur representation has no non-trivial ways of changing its internal data while preserving all the arrows and relationships between its vector spaces. The only allowed changes are uniform rescalings by a scalar.
+
+#### Fundamental Domain
+The cyan-colored triangle in the center is called the fundamental domain.
+For our quiver, it is defined by the three inequalities:
+- $b\leq a + c$
+- $c\leq b$
+- $a\leq b$.
+
+All dimension vectors within the fundamental domain are Schur roots.
+#### Orthogonal Pairs and Exceptional Vectors
+Pairs of dimension vectors are called orthogonal when the corresponding
+generic Hom and Ext spaces both vanish. A zero value of the Euler form is
+necessary for this, but is not sufficient on its own. The program displays
+lines between such orthogonal pairs in the simplex. Each line corresponds to a so-called category that is induced by these pairs.
+#### Reflections
+For each vertex of the quiver, there is a reflection that can be applied to a dimension vector. The integers $1$,$2$ and $3$ each represent the reflection at the respective vertex. The reflections are defined as follows:
+  - $1: (a,b,c) \mapsto (2b - a,b,c)$
+  - $2: (a,b,c) \mapsto (a,2a + 2c - b,c)$
+  - $3: (a,b,c) \mapsto (a,b,2b - c)$
+
+After each reflection, the orientation of the underlying quiver may change. The direction of each arrow going in or out of the vertex at which the reflection is applied is reversed.
+The reflections also induce changes on the level of the representations, but these changes are not relevant for this project.
+
+Reflecting a Schur root results in another Schur root.
