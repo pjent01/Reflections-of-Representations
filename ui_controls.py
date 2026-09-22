@@ -137,3 +137,9 @@ def exceptional_sequence_options():
             "Highlight exceptional vectors (cyan)", value=False
         )
     return excep_number_input, excep_depth_input, excep_highlight_t
+
+def output_colors() -> tuple[str, str]:
+    if st.context.theme.type == "dark":
+        return "rgb(255,70,70)", "#56d364"  # red, green
+    else:
+        return "rgb(180, 0, 0)", "Green"  # red, green

@@ -111,26 +111,28 @@ def process_sequence(
             poly_kind.append("neutral")
 
         # Choose display arrow/color for the current quiver state.
+        red_color, green_color = ui.output_colors()
+        
         if q_state == (1, 1):
             arrow = ui.arrow_symbol("down") if use_arrows else ""
-            line_color = "green" if use_color else "black"
+            text_color = green_color if use_color else "black"
         elif q_state == (0, 1):
             arrow = ui.arrow_symbol("updown") if use_arrows else ""
-            line_color = "rgb(180, 0, 0)" if use_color else "black"
+            text_color = red_color if use_color else "black"
         elif q_state == (1, 0):
             arrow = ui.arrow_symbol("downup") if use_arrows else ""
-            line_color = "rgb(180, 0, 0)" if use_color else "black"
+            text_color = red_color if use_color else "black"
         elif q_state == (0, 0):
             arrow = ui.arrow_symbol("up") if use_arrows else ""
-            line_color = "green" if use_color else "black"
+            text_color = green_color if use_color else "black"
 
         reflection_text = f"{arrow}&emsp;Reflection: {' '.join(digits)}"
         if wrong_t or poly_kind[-1] == "correct":
             output_text.append(
                 ui.format_output_html(
                     reflection_text,
-                    line_color,
-                    bold=(line_color == "green"),
+                    text_color,
+                    bold=(text_color == green_color),
                 )
             )
 
@@ -142,8 +144,8 @@ def process_sequence(
                 output_text.append(
                     ui.format_output_html(
                         point_text,
-                        line_color,
-                        bold=(line_color == "green"),
+                        text_color,
+                        bold=(text_color == green_color),
                         indent_level=1,
                     )
                 )

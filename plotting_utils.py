@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 import plotly.graph_objects as go
 from dataclasses import dataclass
+import streamlit as st
 
 import math_core as mc
 
@@ -45,9 +46,9 @@ def plot_reflected_line_steps(fig: go.Figure, sequence: str, line_pts: list[np.n
         ))
 
 # Ellipse and line geometry.
+line_color = "rgba(0,0,0,0.4)"
 
-
-def add_line(fig: go.Figure, bary1: tuple, bary2: tuple, color: str ="rgba(0,0,0,0.4)", width: float = 1.0) -> None:
+def add_line(fig: go.Figure, bary1: tuple, bary2: tuple, color: str = line_color, width: float = 1.0) -> None:
     """ Add a line segment between two points in barycentric coordinates inside the simplex.
     
     Args: 
@@ -62,7 +63,9 @@ def add_line(fig: go.Figure, bary1: tuple, bary2: tuple, color: str ="rgba(0,0,0
         x=[p1[0], p2[0]],
         y=[p1[1], p2[1]],
         mode="lines",
-        line=dict(color=color, width=width),
+        line=dict(
+            color=color,
+            width=width),
         showlegend=False,
         hoverinfo="skip"
     ))
@@ -144,6 +147,8 @@ def build_simplex_figure(
 
     label_size = 14
 
+    simplex_color = "rgba(230,230,230,0.2)" if st.context.theme.type == "light" else "rgba(230,230,230,0.8)"
+
     simplex_cart = [mc.BL, mc.TOP, mc.BR, mc.BL]
     fig.add_trace(go.Scatter(
         x=[p[0] for p in simplex_cart],
@@ -151,7 +156,7 @@ def build_simplex_figure(
         mode="lines",
         line=dict(color="black", width=3),
         fill="toself",
-        fillcolor="rgba(230,230,230,0.2)",
+        fillcolor=simplex_color,
         name="Simplex",
         showlegend=False,
         hoverinfo="skip",
