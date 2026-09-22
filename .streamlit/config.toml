@@ -1,2 +1,8 @@
-[theme]
+[theme.dark]
+backgroundColor = "rgb(45, 45, 45)"
+secondaryBackgroundColor = "rgb(20,20,20)"
 
+
+[theme.light]
+backgroundColor = "rgb(240,240,240)"
+secondaryBackgroundColor = "rgb(215,215,215)"
