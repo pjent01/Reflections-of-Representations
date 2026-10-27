@@ -21,11 +21,12 @@ The main feature of this project is an interactive Plotly diagram of a barycentr
 
 Below the diagram, the application displays the vectors created at each step of the user-provided sequences, together with the current orientation of the quiver.
 
-## Installation
-### Method 1 (online)
+## Getting Started
+
+### Online Version
 The online version is available at https://reflections.streamlit.app.
 
-### Method 2 (local)
+### Local Installation
 Requires Python 3.12 or newer.  
 Clone this repository and install the requirements in a virtual environment:
 #### Linux / MacOS
@@ -94,7 +95,7 @@ are therefore displayed in cyan. At least for my purposes, only the parts of the
 
 ### Exceptional Sequences Options
 #### Input how many different exceptional sequences should be generated
-This number adjusts on how many of the lines the exceptional dimension vectors should be displayed. Large numbers may harm performance.
+This number determines how many lines the exceptional dimension vectors are displayed on. Large numbers may harm performance.
 
 #### Input how many exceptional vectors should be generated per exceptional sequence
 Each line contains infinitely many exceptional dimension vectors. This number adjusts how many should be displayed. Large numbers may
@@ -110,7 +111,7 @@ decrease drastically.
 ### Text output
 Below the diagrams, there is a text output for the vectors generated after each step of the sequences, one column per sequence. The option 
 `Show Quiver Orientation` may be activated to display the underlying quiver next to each block of dimension vectors. Again, when `Color` is active,
-The blocks for the dimension vectors over the Kronecker chain are displayed in green and those over a quiver of different orientation are displayed
+the blocks for the dimension vectors over the Kronecker chain are displayed in green and those over a quiver of different orientation are displayed
 in red.
 
 ## Mathematical Background
@@ -181,7 +182,7 @@ For our quiver, it is defined by the three inequalities:
 - $c\leq b$
 - $a\leq b$.
 
-All dimension vectors within the fundamental domain are Schur roots.
+All nonzero dimension vectors within the fundamental domain are Schur roots.
 #### Orthogonal Pairs and Exceptional Vectors
 Pairs of dimension vectors are called orthogonal when the corresponding
 generic Hom and Ext spaces both vanish. A zero value of the Euler form is
